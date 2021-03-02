@@ -1,23 +1,15 @@
-![Latest GitHub Release](https://img.shields.io/github/v/release/byu-oit/terraform-aws-<module_name>?sort=semver)
+![Latest GitHub Release](https://img.shields.io/github/v/release/byu-oit/terraform-aws-schema-migrations-lambda?sort=semver)
 
-# Terraform Module Template
-GitHub template to quickly create Terraform modules
-
-## To Use Template
-1. Click the "Use this template" button 
-2. Name your terraform module repo as `terraform-aws-<module_name>` (if creating non-AWS module change `aws` to the cloud provider)
-3. Rename this README's title to the title you named your repo in #2
-4. Update the shield badge URL to match the module's repo at the top of this README
-5. Update this README to match the module's title (in the usage section)
-6. Update `examples/simple/simple-example.tf` to match the module's title
-7. Remove [this section](#to-use-template) from the README
-
-#### [New to Terraform Modules at BYU?](https://github.com/byu-oit/terraform-documentation)
+# Terraform AWS Schema Migrations Lambda
+Terraform module that creates a generic lambda function that will run
+database schema migrations using
+[Umzug](https://github.com/sequelize/umzug) or
+[Flyway](https://github.com/markgardner/node-flywaydb)
 
 ## Usage
 ```hcl
-module "<module_name>" {
-  source = "github.com/byu-oit/terraform-aws-<module_name>?ref=v1.0.0"
+module "schema_migrations_lambda" {
+  source = "github.com/byu-oit/terraform-aws-schema-migrations-lambda?ref=v1.0.0"
 }
 ```
 
