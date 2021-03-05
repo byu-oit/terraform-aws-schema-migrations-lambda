@@ -17,11 +17,12 @@ module "schema_migrations_lambda" {
 * Terraform version 0.12.16 or greater
 
 ## Inputs
-| Name | Type  | Description | Default |
-| --- | --- | --- | --- |
-| | | | |
+
+| Name | Type | Description | Default |
+|:-----|:-----|:------------|:--------|
+|      |      |             |         |
 
 ## Outputs
 | Name | Type | Description |
-| ---  | ---  | --- |
-| | | |
+|:-----|:-----|:------------|
+|      |      |             |

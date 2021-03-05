@@ -5,6 +5,9 @@
 *.tfstate
 *.tfstate.*
 
+# .tfvars files
+*.tfvars
+
 # Crash log files
 crash.log
 
@@ -17,3 +20,6 @@ override.tf.json
 
 # Ignore jetbrains .idea folder
 .idea
+
+# NodeJS
+node_modules
