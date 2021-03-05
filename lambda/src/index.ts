@@ -15,7 +15,7 @@ type IncomingEvent = {
 
 const {aws: {region}, db, migrations} = env.get()
 
-const codedeploy = new CodeDeployClient({ region })
+const codeDeploy = new CodeDeployClient({ region })
 const s3 = new S3Client({ region })
 
 export async function handler (event: IncomingEvent) {
@@ -74,7 +74,7 @@ export async function handler (event: IncomingEvent) {
                 lifecycleEventHookExecutionId: executionId,
                 status: failed ? 'Failed' : 'Succeeded'
             })
-            await codedeploy.send(putLifecycleEventHookExecutionStatusCommand)
+            await codeDeploy.send(putLifecycleEventHookExecutionStatusCommand)
         }
     }
 }
