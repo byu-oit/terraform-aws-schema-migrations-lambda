@@ -3,15 +3,29 @@ import {UmzugStorage, MigrationParams} from 'umzug'
 import {StorageContext} from './index'
 
 export class MySqlStorage implements UmzugStorage<StorageContext<Connection>> {
+    // Helper method for converting mysql query callback to promise
+    static query (client: Connection, sql: string, params: unknown[] = []) {
+        return new Promise<any>((resolve, reject) => {
+            return client.query(sql, params, (err, results, fields) => {
+                if (err) return reject(err)
+                return resolve([results, fields])
+            })
+        })
+    }
     async logMigration ({ name, path, context}: MigrationParams<StorageContext<Connection>>) {
         const {client, table} = context
+        await MySqlStorage.query(client, `insert into ${table}(name) values ($1)`, [name])
     }
 
     async unlogMigration ({ name, path, context}: MigrationParams<StorageContext<Connection>>) {
         const {client, table} = context
+        await MySqlStorage.query(client, `delete from ${table} where name = $1`, [name])
     }
 
     async executed ({context}: Pick<MigrationParams<StorageContext<Connection>>, 'context'>) {
-        return []
+        const {client, table} = context
+        await MySqlStorage.query(client, `create table if not exists ${table}(name text)`)
+        const [result] = await MySqlStorage.query(client, `select name from ${table}`)
+        return result.map(({name}: {name: string}) => name)
     }
 }
