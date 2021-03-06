@@ -3,12 +3,12 @@ import {UmzugStorage, MigrationParams} from 'umzug'
 import {StorageContext} from './index'
 
 export class PostgreSQLStorage implements UmzugStorage<StorageContext<Client>> {
-    async logMigration ({ name, path, context}: MigrationParams<StorageContext<Client>>) {
+    async logMigration ({ name, context}: MigrationParams<StorageContext<Client>>) {
         const {client, table} = context
         await client.query(`insert into ${table}(name) values(?)`, [name])
     }
 
-    async unlogMigration ({ name, path, context}: MigrationParams<StorageContext<Client>>) {
+    async unlogMigration ({ name, context}: MigrationParams<StorageContext<Client>>) {
         const {client, table} = context
         await client.query(`delete from ${table} where name = ?`, [name])
     }

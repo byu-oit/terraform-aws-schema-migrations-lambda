@@ -12,12 +12,12 @@ export class MySqlStorage implements UmzugStorage<StorageContext<Connection>> {
             })
         })
     }
-    async logMigration ({ name, path, context}: MigrationParams<StorageContext<Connection>>) {
+    async logMigration ({ name, context}: MigrationParams<StorageContext<Connection>>) {
         const {client, table} = context
         await MySqlStorage.query(client, `insert into ${table}(name) values ($1)`, [name])
     }
 
-    async unlogMigration ({ name, path, context}: MigrationParams<StorageContext<Connection>>) {
+    async unlogMigration ({ name, context}: MigrationParams<StorageContext<Connection>>) {
         const {client, table} = context
         await MySqlStorage.query(client, `delete from ${table} where name = $1`, [name])
     }
