@@ -6,6 +6,7 @@
   "scripts": {
     "build": "npm run clean && tsc",
     "clean": "del-cli dist",
+    "lint": "ts-standard",
     "test": "tsc --noEmit"
   },
   "repository": {
@@ -32,6 +33,7 @@
     "@types/pg": "^7.14.11",
     "aws-sdk": "^2.854.0",
     "del-cli": "^3.0.1",
+    "ts-standard": "^10.0.0",
     "typescript": "^4.2.2"
   },
   "dependencies": {
@@ -41,5 +43,15 @@
     "mysql": "^2.18.1",
     "pg": "^8.5.1",
     "umzug": "^3.0.0-beta.15"
+  },
+  "ts-standard": {
+    "env": [
+      "node"
+    ],
+    "ignore": [
+      "dist",
+      "node_modules"
+    ],
+    "fix": true
   }
 }
