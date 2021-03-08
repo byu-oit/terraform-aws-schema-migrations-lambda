@@ -3,8 +3,7 @@
 # Terraform AWS Schema Migrations Lambda
 Terraform module that creates a generic lambda function that will run
 database schema migrations using
-[Umzug](https://github.com/sequelize/umzug) or
-[Flyway](https://github.com/markgardner/node-flywaydb)
+[Umzug](https://github.com/sequelize/umzug)
 
 ## Usage
 ```hcl
