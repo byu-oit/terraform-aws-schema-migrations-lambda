@@ -1,6 +1,7 @@
+# Terraform AWS Schema Migrations
+
 ![Latest GitHub Release](https://img.shields.io/github/v/release/byu-oit/terraform-aws-schema-migrations-lambda?sort=semver)
 
-# Terraform AWS Schema Migrations Lambda
 Terraform module that creates a generic lambda function that will run
 database schema migrations using
 [Umzug](https://github.com/sequelize/umzug)

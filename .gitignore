@@ -23,3 +23,6 @@ override.tf.json
 
 # NodeJS
 node_modules
+
+# Distribution
+dist
