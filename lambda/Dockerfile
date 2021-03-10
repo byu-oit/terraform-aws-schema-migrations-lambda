@@ -1,4 +1,4 @@
-FROM node:14.16-slim as base
+FROM node:14.16-buster as base
 
 # Install aws-lambda-cpp build dependencies
 # See https://github.com/aws/aws-lambda-nodejs-runtime-interface-client for details
@@ -11,7 +11,7 @@ RUN echo -n > /noop
 WORKDIR /usr/app
 
 # Copy over src files and install dependencies
-COPY package*.json ./
+COPY *.json ./
 COPY src ./src/
 RUN npm --production install
 
@@ -42,7 +42,7 @@ RUN npm test
 
 # You can target this stage to check that all the tests pass
 FROM base as test
-COPY --from=build dist ./dist/
+COPY --from=build /usr/app/dist ./dist/
 COPY --from=audit /noop /
 COPY --from=lint /noop /
 COPY --from=unittest /noop /
