@@ -79,7 +79,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Lambda Package Version
-        uses: actions/github-script@3
+        uses: actions/github-script@v3
         id: package-version
         with:
           script: |
