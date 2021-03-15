@@ -1,20 +1,22 @@
 terraform {
-  required_version = ">= 0.12.16"
+  required_version = ">= 0.13"
   required_providers {
-    aws = ">= 3.0.0"
+    aws = ">= 3.19"
   }
 }
 
 locals {
+  use_ssm_for_username = regexall("^/", var.database.username)
+  use_ssm_for_password = regexall("^/", var.database.password)
   lambda_env_variables = {
     MIGRATIONS_BUCKET = aws_s3_bucket.schema_migration_bucket[0].bucket
-    DB_ENGINE = data.aws_db_instance.db_instance.engine
-    DB_HOST = data.aws_db_instance.db_instance.endpoint
-    DB_PORT = data.aws_db_instance.db_instance.port
-    DB_NAME = data.aws_db_instance.db_instance.db_name
-    DB_USERNAME = data.aws_ssm_parameter.db_username.value ? data.aws_ssm_parameter.db_username.value : var.database.username
-    DB_PASSWORD = data.aws_ssm_parameter.db_password.value ? data.aws_ssm_parameter.db_password.value : var.database.password
-    REGION = data.aws_region.current.name
+    DB_ENGINE         = data.aws_db_instance.db_instance.engine // Should be postgres or mysql
+    DB_HOST           = data.aws_db_instance.db_instance.endpoint
+    DB_PORT           = data.aws_db_instance.db_instance.port
+    DB_NAME           = var.database.name != null ? var.database.name : data.aws_db_instance.db_instance.db_name
+    DB_USERNAME       = local.use_ssm_for_username ? data.aws_ssm_parameter.db_username.value : var.database.username
+    DB_PASSWORD       = local.use_ssm_for_password ? data.aws_ssm_parameter.db_password.value : var.database.password
+    REGION            = data.aws_region.current.name
   }
   lambda_function_name = "${var.app_name}-schema-migrations"
 }
@@ -28,13 +30,13 @@ locals {
 data "aws_region" "current" {}
 
 data "aws_ssm_parameter" "db_username" {
-  count = regexall('^/', var.database.username) ? 0 : 1
-  name = var.database.username
+  count = local.use_ssm_for_username ? 0 : 1
+  name  = var.database.username
 }
 
 data "aws_ssm_parameter" "db_password" {
-  count = regexall('^/', var.database.password) ? 0 : 1
-  name = var.database.password
+  count = local.use_ssm_for_password ? 0 : 1
+  name  = var.database.password
 }
 
 data "aws_db_instance" "db_instance" {
@@ -107,7 +109,7 @@ resource "aws_s3_bucket_public_access_block" "default" {
 }
 
 resource "aws_s3_bucket_object" "migrations" {
-  for_each = fileset(var.migration_files)
+  for_each = fileset(dirname(var.migration_files), basename(var.migration_files))
 
   bucket = aws_s3_bucket.schema_migration_bucket[0].bucket
   key    = each.value
@@ -159,22 +161,27 @@ resource "aws_iam_role_policy_attachment" "s3_access" {
 # -----------------------------------------------------------------------------
 # START OF LAMBDA FUNCTION
 # -----------------------------------------------------------------------------
+
+data "aws_ecr_repository" "migrations_lambda" {
+  name = "schema-migrations-lambda" # Must match the name in /iac/set/main.tf#ecr.name
+}
+
 resource "aws_lambda_function" "migrations_lambda" {
-  filename         = "${path.module}/lambda/dist/function.zip"
-  function_name    = local.lambda_function_name
-  role             = aws_iam_role.migrations_lambda.arn
-  handler          = "index.handler"
-  runtime          = "nodejs14.x"
-  timeout          = var.timeout
-  memory_size      = var.memory_size
-  source_code_hash = base64sha256("${path.module}/lambda/dist/function.zip")
+  function_name = local.lambda_function_name
+  description   = "Runs schema migrations on ${data.aws_db_instance.db_instance.db_instance_identifier}"
+  role          = aws_iam_role.migrations_lambda.arn
+  image_uri     = data.aws_ecr_repository.migrations_lambda.repository_url
+  runtime       = null
+  handler       = null
+  timeout       = var.timeout
+  memory_size   = var.memory_size
   environment {
     variables = local.lambda_env_variables
   }
   tags = var.tags
 
   depends_on = [
-    aws_cloudwatch_log_group.lambda_logs,
+    aws_cloudwatch_log_group.lambda_logs
   ]
 }
 
@@ -201,7 +208,7 @@ EOF
 }
 
 resource "aws_iam_role_policy" "migrations_lambda" {
-  name = "${var.app_name}-postman-tests"
+  name = "${var.app_name}-schema-migrations"
   role = aws_iam_role.migrations_lambda.name
 
   policy = <<EOF

@@ -16,10 +16,14 @@ variable "migrations_bucket_name" {
 
 variable "database" {
   type = object({
+    # The rds instance identifier
     identifier = string
-    username   = string
-    password   = string
-    name       = string
+    # The username for the DDL user
+    username = string
+    # The password for the DDL user
+    password = string
+    # The name of the database or schema where the tables reside
+    name = string
   })
   description = "The RDS database connection information"
   sensitive   = true
@@ -44,12 +48,12 @@ variable "tags" {
 
 variable "memory_size" {
   type        = number
-  description = "the size of memory for the lambda"
+  description = "The size of the memory of the lambda"
   default     = 128
 }
 
 variable "timeout" {
   type        = number
-  description = "the amount of time the lambda is allowed to run for"
-  default     = 30
+  description = "The max number of seconds the lambda will run for without stopping"
+  default     = 900
 }

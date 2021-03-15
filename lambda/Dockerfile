@@ -1,14 +1,13 @@
-FROM node:14.16-buster as base
-
-# Install aws-lambda-cpp build dependencies
-# See https://github.com/aws/aws-lambda-nodejs-runtime-interface-client for details
-RUN apt-get update
-RUN apt-get install -y g++ make cmake unzip autoconf libtool libcurl4-openssl-dev
+# Using the official AWS Lambda NodeJS image
+# Node Image Repository: https://github.com/aws/aws-lambda-base-images/tree/nodejs14.x
+# Docs: https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html#configuration-envvars-runtime
+FROM public.ecr.aws/lambda/nodejs:14 as base
 
 # An empty file that we can "copy" around to create dependencies between build stages
 RUN echo -n > /noop
 
-WORKDIR /usr/app
+# The lambda task root is where the source code should go
+WORKDIR $LAMBDA_TASK_ROOT
 
 # Copy over src files and install dependencies
 COPY *.json ./
@@ -42,7 +41,7 @@ RUN npm test
 
 # You can target this stage to check that all the tests pass
 FROM base as test
-COPY --from=build /usr/app/dist ./dist/
+COPY --from=build $LAMBDA_TASK_ROOT/dist ./dist/
 COPY --from=audit /noop /
 COPY --from=lint /noop /
 COPY --from=unittest /noop /
@@ -50,12 +49,8 @@ COPY --from=unittest /noop /
 # Note that test is basically identical to base, except that it requires that all tests pass
 FROM test as release
 ENV NODE_ENV="production"
-EXPOSE 8080
-USER node
 
-# Note that aws-lambda-ric must be installed as a dependency of this module
-# Docs: https://github.com/aws/aws-lambda-nodejs-runtime-interface-client
-ENTRYPOINT ["/usr/local/bin/npx", "aws-lambda-ric"]
-CMD ["app.handler"]
+# Pass in the lambda handler function location argument
+CMD ["dist/index.handler"]
 
 # https://docs.docker.com/engine/reference/builder/

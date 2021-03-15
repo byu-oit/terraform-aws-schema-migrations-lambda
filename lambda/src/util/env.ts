@@ -12,7 +12,7 @@ export interface AWSEnvConfiguration {
 }
 
 export interface DBEnvConfiguration {
-  engine: 'mysql' | 'pg'
+  engine: string // Should be postgres or mysql
   host: string
   port: number
   database: string

@@ -2,11 +2,29 @@ import { CodeDeployClient, PutLifecycleEventHookExecutionStatusCommand } from '@
 import { Umzug } from 'umzug'
 import * as env from './util/env'
 import { downloadMigrations } from './util/s3'
-import clients, { GenericConnection } from './clients'
+import clients from './clients'
 import storage from './storage'
 
 const { aws: { region }, db, migrations } = env.get()
 const codeDeploy = new CodeDeployClient({ region })
+
+// Get supported client
+const client = clients[db.engine]
+if (!client) throw Error(`Unsupported database engine "${db.engine}"`)
+
+// Setup schema migrations
+// Umzug instance docs: https://github.com/sequelize/umzug/blob/master/src/types.ts
+const umzug = new Umzug({
+  storage: storage[db.engine],
+  logger: console,
+  context: { client, table: migrations.table },
+  migrations: {
+    glob: migrations.dir + '/*' // All files uploaded to the s3 bucket
+  }
+})
+
+// export the type helper exposed by umzug, which will have the `context` argument typed correctly
+export type Migration = typeof umzug._types.migration
 
 export async function handler (event: {
   // Incoming event from ECS lifecycle Hook looks something like this
@@ -16,31 +34,20 @@ export async function handler (event: {
   Combined?: string
 }): Promise<void> {
   let failed = false
-  let client: GenericConnection | null = null
   const { DeploymentId: deploymentId, LifecycleEventHookExecutionId: executionId, Combined: combined } = event
 
   try {
     // Download migration files to the specified directory
     await downloadMigrations(migrations.bucket, migrations.dir)
 
-    // Establish database connection using supported clients using a GenericConnection
+    // Establish database connection for supported clients using a GenericConnection interface
     // See ./src/clients/index for GenericConnection type
-    client = clients[db.engine]
     await client.connect(db)
-
-    // Setup schema migrations
-    // Umzug instance docs: https://github.com/sequelize/umzug/blob/master/src/types.ts
-    const umzug = new Umzug({
-      storage: storage[db.engine],
-      migrations: { glob: migrations.dir + '/*' },
-      context: { client, table: migrations.table },
-      logger: console
-    })
 
     // Run schema migrations
     // It is best to write schema migrations as a transaction to avoid the possibility of partially executed
-    // migrations. Umzug uses verror module to print human readable stack traces. An errors thrown inside umzug
-    // will print good error messages using e.stack.
+    // migrations. Umzug uses verror module to print human readable stack traces. An error thrown inside umzug
+    // will print human-readable error messages using e.stack.
     // Migration Docs: https://github.com/sequelize/umzug#executing-pending-migrations
     // Error Docs: https://github.com/joyent/node-verror#verror-rich-javascript-errors
     await umzug.up()
@@ -50,9 +57,7 @@ export async function handler (event: {
     throw e
   } finally {
     // Close database connection
-    if (client != null) {
-      await client.close()
-    }
+    await client.close()
 
     // Report lifecycle event hook status, if not combined
     // Note: This allows us to call the lambda from a lifecycle hook or invoke it directly. If invoked directly,

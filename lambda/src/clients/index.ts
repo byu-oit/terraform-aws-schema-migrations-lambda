@@ -1,5 +1,5 @@
 import mysql from './mysql'
-import pg from './pg'
+import postgres from './postgres'
 import { DBEnvConfiguration } from '../util/env'
 
 export interface GenericConnection<Client = unknown> {
@@ -9,7 +9,7 @@ export interface GenericConnection<Client = unknown> {
 
 const connections: Record<string, GenericConnection> = {
   mysql,
-  pg
+  postgres
 }
 
 export default connections

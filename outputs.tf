@@ -6,7 +6,7 @@ output "lambda_iam_role" {
   value = aws_iam_role.migrations_lambda
 }
 
-output "migrations_bucket" {
+output "schema_migrations_bucket" {
   value = aws_s3_bucket.schema_migration_bucket[0]
 }
 
