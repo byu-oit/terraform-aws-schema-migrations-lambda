@@ -81,6 +81,7 @@ jobs:
       - name: Lambda Package Version
         uses: actions/github-script@v3
         id: package-version
+        working-directory: lambda
         with:
           script: |
             const dir = core.getInput('workingdir', { required: false }) || process.cwd()
