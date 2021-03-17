@@ -28,6 +28,23 @@ module "ecr" {
   ]
 }
 L_POLICY
+  repository_policy = <<R_POLICY
+{
+  "Version": "2008-10-17",
+  "Statement": [
+	{
+	  "Sid": "pull",
+	  "Effect": "Allow",
+	  "Principal": "*",
+	  "Action": [
+		"ecr:GetDownloadUrlForLayer",
+		"ecr:BatchGetImage",
+		"ecr:BatchCheckLayerAvailability"
+	  ]
+	}
+  ]
+}
+R_POLICY
 }
 
 output "ecr" {
