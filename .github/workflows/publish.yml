@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: env
     strategy:
-      matrix: ${{ needs.env.outputs.matri_ }}
+      matrix: ${{ fromJson(needs.env.outputs.matrix) }}
     steps:
       - name: Set up Node.js
         uses: actions/setup-node@v1
