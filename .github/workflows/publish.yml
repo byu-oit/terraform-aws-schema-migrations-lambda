@@ -79,37 +79,11 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Lambda Package Version
-        uses: actions/github-script@v3
-        id: package-version
-        working-directory: lambda
+        uses: byu-oit/github-action-package-json@v1
+        id: package
         with:
-          script: |
-            const dir = core.getInput('workingdir', { required: false }) || process.cwd()
-            const file = dir + '/package.json'
-
-            try {
-              const pkg = require(file)
-              const version = pkg.version
-              if (!version) {
-                core.setFailed('No version detected in package.json')
-                return
-              }
-
-              const versionRx = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
-              const matches = version.match(versionRx)
-              if (matches === null) {
-                core.setFailed('Invalid semantic version "${version}"')
-                return
-              }
-
-              const [full, major, minor, patch] = matches
-              core.setOutput('version', full)
-              core.setOutput('major', major)
-              core.setOutput('minor', `${major}.{minor}`)
-            } catch (e) {
-              const msg = e.code === 'MODULE_NOT_FOUND' ? `No package.json found at ${file}` : `An unknown error occured: ${e.message}`
-              core.setFailed(msg)
-            }
+          directory: lambda
+          version: true
 
       - name: Build and Push the Docker image
         working-directory: lambda
