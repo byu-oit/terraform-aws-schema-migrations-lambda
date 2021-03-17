@@ -7,9 +7,10 @@ provider "aws" {
 }
 
 module "ecr" {
-  source           = "github.com/byu-oit/terraform-aws-ecr?ref=v2.0.1"
-  name             = "schema-migrations-lambda"
-  lifecycle_policy = <<L_POLICY
+  source               = "github.com/byu-oit/terraform-aws-ecr?ref=v2.0.1"
+  image_tag_mutability = "MUTABLE"
+  name                 = "schema-migrations-lambda"
+  lifecycle_policy     = <<L_POLICY
 {
   "rules": [
     {
