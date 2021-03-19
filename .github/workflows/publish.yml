@@ -2,7 +2,11 @@ name: Publish
 
 on:
   push:
-    branches: [master, release]
+    branches:
+      - latest
+      - edge
+    tags:
+      - v**.**.**
 
 env:
   node_version: "14.x"
@@ -13,29 +17,12 @@ jobs:
     name: Set Env Vars
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Beta Environment Variables
-        if: github.ref == 'refs/heads/master'
+      - name: Set up Environment Variables
         run: |
           matrix='{
             "env":[
               {
-                "ecr_repo_name":"terraform-aws-schema-migrations-lambda",
-                "ecr_repo_tag":"beta",
-                "tf_working_dir":".",
-                "aws_key_name":"byu_oit_terraform_prd_key",
-                "aws_secret_name":"byu_oit_terraform_prd_secret"
-              }
-            ]
-          }'
-          echo matrix=`echo $matrix | jq -c .` >> $GITHUB_ENV
-      - name: Set up Latest Environment Variables
-        if: github.ref == 'refs/heads/release'
-        run: |
-          matrix='{
-            "env":[
-              {
-                "ecr_repo_name":"terraform-aws-schema-migrations-lambda",
-                "ecr_repo_tag":"latest",
+                "ecr_repo_name":"schema-migrations-lambda",
                 "tf_working_dir":".",
                 "aws_key_name":"byu_oit_terraform_prd_key",
                 "aws_secret_name":"byu_oit_terraform_prd_secret"
@@ -78,24 +65,18 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Lambda Package Version
-        uses: byu-oit/github-action-package-json@v1
-        id: package
-        with:
-          directory: lambda
-          version: true
+      - name: Get the source name
+        id: source
+        run: echo ::set-output name=name::${GITHUB_REF#refs/*/}
 
       - name: Build and Push the Docker image
         working-directory: lambda
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPO: ${{ matrix.env.ecr_repo_name }} # ecr_repo_name must match /lambda/iac/setup#ecr.name
-          NAME_TAG: ${{ matrix.env.ecr_repo_tag }}
-          VERSION_TAG: ${{ steps.package.outputs.version }}
-          MAJOR_TAG: ${{ steps.package.outputs.version_major }}
-          MINOR_TAG: ${{ steps.package.outputs.version_minor }}
+          SOURCE_NAME: ${{ steps.source.outputs.name }}
         # Push multiple tags at once docker (since 20.10.0): https://github.com/docker/cli/pull/2220
         # GHA Docker Version is 20.10.x: https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPO:$NAME_TAG -t $ECR_REGISTRY/$ECR_REPO:$VERSION_TAG -t $ECR_REGISTRY/$ECR_REPO:$MAJOR_TAG -t $ECR_REGISTRY/$ECR_REPO:$MINOR_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPO --all-tags
+          docker build -t $ECR_REGISTRY/$ECR_REPO:$SOURCE_NAME .
+          docker push $ECR_REGISTRY/$ECR_REPO:$SOURCE_NAME
