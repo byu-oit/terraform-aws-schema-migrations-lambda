@@ -8,8 +8,8 @@
     "clean": "del-cli dist",
     "lint": "ts-standard",
     "test": "echo \"No test specified\"",
-    "tag": "./scripts/tag.sh --",
-    "release": "./scripts/release.sh --",
+    "tag": "./scripts/tag.sh",
+    "release": "./scripts/release.sh",
     "prepare": "husky install"
   },
   "repository": {
