@@ -12,7 +12,7 @@ locals {
   lambda_env_variables = {
     MIGRATIONS_BUCKET = aws_s3_bucket.schema_migration_bucket.bucket
     DB_ENGINE         = data.aws_db_instance.db_instance.engine // Should be postgres or mysql
-    DB_HOST           = data.aws_db_instance.db_instance.endpoint
+    DB_HOST           = data.aws_db_instance.db_instance.address
     DB_PORT           = data.aws_db_instance.db_instance.port
     DB_NAME           = var.database.name != null ? var.database.name : data.aws_db_instance.db_instance.db_name
     DB_USERNAME       = data.aws_ssm_parameter.db_username.name
