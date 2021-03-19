@@ -24,7 +24,7 @@ resource "aws_ecr_repository" "repo" {
 }
 
 resource "aws_ecr_repository_policy" "repo_policy" {
-  policy = <<R_POLICY
+  policy     = <<R_POLICY
 {
   "Version": "2008-10-17",
   "Statement": [

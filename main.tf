@@ -6,6 +6,9 @@ terraform {
 }
 
 locals {
+  ecr_repo = "schema-migrations-lambda"
+  //  ecr_image_tag = "latest"
+  ecr_image_tag        = "edge" // Edge tag is for testing, use latest or another version tag
   use_ssm_for_username = regexall("^/", var.database.username)
   use_ssm_for_password = regexall("^/", var.database.password)
   lambda_env_variables = {
@@ -163,14 +166,19 @@ resource "aws_iam_role_policy_attachment" "s3_access" {
 # -----------------------------------------------------------------------------
 
 data "aws_ecr_repository" "migrations_lambda" {
-  name = "schema-migrations-lambda" # Must match the name in /iac/set/main.tf#ecr.name
+  name = local.ecr_repo # Must match the name in /iac/set/main.tf#ecr.name
+}
+
+data "aws_ecr_image" "migrations_lambda" {
+  repository_name = local.ecr_repo # Must match the name in /iac/set/main.tf#ecr.name
+  image_tag       = local.ecr_image_tag
 }
 
 resource "aws_lambda_function" "migrations_lambda" {
   function_name = local.lambda_function_name
   description   = "Runs schema migrations on ${data.aws_db_instance.db_instance.db_instance_identifier}"
   role          = aws_iam_role.migrations_lambda.arn
-  image_uri     = data.aws_ecr_repository.migrations_lambda.repository_url
+  image_uri     = "${data.aws_ecr_repository.migrations_lambda.repository_url}:${data.aws_ecr_image.migrations_lambda.image_tag}"
   runtime       = null
   handler       = null
   timeout       = var.timeout
