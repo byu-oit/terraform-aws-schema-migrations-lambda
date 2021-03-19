@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { S3Client, ListObjectsCommand, GetObjectCommand, GetObjectCommandOutput } from '@aws-sdk/client-s3'
+import { S3Client, ListObjectsCommand, GetObjectCommand } from '@aws-sdk/client-s3'
 import path from 'path'
 import * as env from './env'
 
@@ -8,7 +8,7 @@ const s3 = new S3Client({ region })
 
 export async function downloadMigrations (bucket: string, downloadFolder: string): Promise<void> {
   // Ensure download folder exists and that it's empty
-  fs.rmdirSync(downloadFolder, {recursive: true})
+  fs.rmdirSync(downloadFolder, { recursive: true })
   fs.mkdirSync(downloadFolder)
 
   // List bucket contents
@@ -28,7 +28,7 @@ export async function downloadMigrations (bucket: string, downloadFolder: string
   await Promise.all(downloads.map(async ({ fileName, content }) => {
     const stream = fs.createWriteStream(path.join(downloadFolder, fileName))
     content.pipe(stream)
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       stream.on('error', reject)
       stream.on('close', resolve)
     })
