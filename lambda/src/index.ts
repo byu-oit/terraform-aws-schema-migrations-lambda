@@ -2,15 +2,15 @@ import { CodeDeployClient, PutLifecycleEventHookExecutionStatusCommand } from '@
 import { Umzug } from 'umzug'
 import * as env from './util/env'
 import { downloadMigrations } from './util/s3'
-import clients from './clients'
-import storage from './storage'
+import {clients} from './clients'
+import {storage} from './storage'
 
 const { aws: { region }, db, migrations } = env.get()
 const codeDeploy = new CodeDeployClient({ region })
 
 // Get supported client
 const client = clients[db.engine]
-if (client != null) throw Error(`Unsupported database engine "${db.engine}"`)
+if (client == null) throw Error(`Unsupported database engine "${db.engine}"`)
 
 // Setup schema migrations
 // Umzug instance docs: https://github.com/sequelize/umzug/blob/master/src/types.ts

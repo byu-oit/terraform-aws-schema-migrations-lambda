@@ -7,9 +7,7 @@ export interface GenericConnection<Client = unknown> {
   close: () => Promise<void>
 }
 
-const connections: Record<string, GenericConnection> = {
+export const clients: Record<string, GenericConnection> = {
   mysql,
   postgres
 }
-
-export default connections

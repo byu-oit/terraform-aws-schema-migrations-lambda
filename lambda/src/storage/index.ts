@@ -7,9 +7,7 @@ export interface StorageContext<Client> {
   client: Client
 }
 
-const storage: Record<string, UmzugStorage<any>> = {
+export const storage: Record<string, UmzugStorage<any>> = {
   mysql: new MySqlStorage(),
   postgres: new PostgreSQLStorage()
 }
-
-export default storage
