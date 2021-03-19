@@ -1,5 +1,5 @@
-import fs from 'fs/promises'
-import { S3Client, ListObjectsCommand, GetObjectCommand } from '@aws-sdk/client-s3'
+import fs from 'fs'
+import { S3Client, ListObjectsCommand, GetObjectCommand, GetObjectCommandOutput } from '@aws-sdk/client-s3'
 import path from 'path'
 import * as env from './env'
 
@@ -7,8 +7,9 @@ const { aws: { region } } = env.get()
 const s3 = new S3Client({ region })
 
 export async function downloadMigrations (bucket: string, downloadFolder: string): Promise<void> {
-  // Ensure download folder exists
-  await fs.mkdir(downloadFolder)
+  // Ensure download folder exists and that it's empty
+  fs.rmdirSync(downloadFolder, {recursive: true})
+  fs.mkdirSync(downloadFolder)
 
   // List bucket contents
   const listObjectsCommand = new ListObjectsCommand({ Bucket: bucket })
@@ -25,6 +26,14 @@ export async function downloadMigrations (bucket: string, downloadFolder: string
 
   // Store all migrations locally
   await Promise.all(downloads.map(async ({ fileName, content }) => {
-    return await fs.writeFile(path.join(downloadFolder, fileName), content)
+    const stream = fs.createWriteStream(path.join(downloadFolder, fileName))
+    content.pipe(stream)
+    return new Promise((resolve, reject) => {
+      stream.on('error', reject)
+      stream.on('close', resolve)
+    })
   }))
+
+  // Log the downloaded migrations
+  console.info(`Migration files downloaded:\n ${fs.readdirSync(downloadFolder).join('\n')}`)
 }
