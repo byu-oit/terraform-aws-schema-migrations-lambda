@@ -44,7 +44,9 @@ export function get (): EnvConfiguration {
     const migrations: MigrationsEnvConfiguration = {
       table: env.get('MIGRATIONS_TABLE').default('migrations').asString(),
       bucket: env.get('MIGRATIONS_BUCKET').required().asString(),
-      dir: path.resolve('../../migrations')
+      // The /tmp directory is the only writeable directory for lambda
+      // Docs: https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html
+      dir: path.resolve('/tmp/migrations')
     }
     config = { aws, db, migrations }
   }
