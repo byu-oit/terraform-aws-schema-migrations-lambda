@@ -118,12 +118,12 @@ export const down: Migration = async ({client}) => {
 
 #### Database Definition
 
-| Name       | Type   | Description                                                                                                                                                                             | Default                                                                                                                                |
-|:-----------|:-------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------|
-| identifier | string | The [rds instance identifier](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/db_instance#db_instance_identifier)                                        | **REQUIRED**                                                                                                                           |
-| username   | string | The username for the DDL user or an [AWS SSM parameter name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter#name) (e.g. /my/ssm/username) | **REQUIRED**                                                                                                                           |
-| password   | string | The password for the DDL user or an [AWS SSM parameter name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter#name) (e.g. /my/ssm/password) | **REQUIRED**                                                                                                                           |
-| name       | string | The name of the database or schema where the tables reside                                                                                                                              | [aws_db_instance.db_instance.port](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/db_instance#db_name) |
+| Name       | Type   | Description                                                                                                                                                                                               | Default                                                                                                                                |
+|:-----------|:-------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------|
+| identifier | string | The [rds instance identifier](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/db_instance#db_instance_identifier)                                                          | **REQUIRED**                                                                                                                           |
+| username   | string | The SSM parameter path for the username of a DDL user [AWS SSM parameter name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter#name) (e.g. /my/ssm/username) | **REQUIRED**                                                                                                                           |
+| password   | string | The SSM parameter path for the password of a DDL user [AWS SSM parameter name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter#name) (e.g. /my/ssm/password) | **REQUIRED**                                                                                                                           |
+| name       | string | The name of the database or schema where the tables reside                                                                                                                                                | [aws_db_instance.db_instance.db_name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/db_instance#db_name) |
 
 ## Outputs
 
@@ -139,6 +139,15 @@ export const down: Migration = async ({client}) => {
 Create and push a new tag representing the major (v1), minor (v1.0), and
 patch (v1.0.0) versions. If the tag already exists, you may force push a
 tag (see example below).
+
+You can use the scripts `release` and `tag` to accomplish these tasks:
+```bash
+# Create an edge and latest branch (this will fire the CI to create new ECR tags)
+npm run release edge latest
+
+# Create new git tags (this will fire the CI to create new ECR tags)
+npm run tag v1 v1.0 v1.0.0
+```
 
 Example:
 

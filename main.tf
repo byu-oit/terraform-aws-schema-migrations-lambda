@@ -8,20 +8,20 @@ terraform {
 locals {
   ecr_repo = "schema-migrations-lambda"
   //  ecr_image_tag = "latest"
-  ecr_image_tag        = "edge" // Edge tag is for testing, use latest or another version tag
-  use_ssm_for_username = regexall("^/", var.database.username)
-  use_ssm_for_password = regexall("^/", var.database.password)
+  ecr_image_tag = "edge" // Edge tag is for testing, use latest or another version tag
   lambda_env_variables = {
-    MIGRATIONS_BUCKET = aws_s3_bucket.schema_migration_bucket[0].bucket
+    MIGRATIONS_BUCKET = aws_s3_bucket.schema_migration_bucket.bucket
     DB_ENGINE         = data.aws_db_instance.db_instance.engine // Should be postgres or mysql
     DB_HOST           = data.aws_db_instance.db_instance.endpoint
     DB_PORT           = data.aws_db_instance.db_instance.port
     DB_NAME           = var.database.name != null ? var.database.name : data.aws_db_instance.db_instance.db_name
-    DB_USERNAME       = local.use_ssm_for_username ? data.aws_ssm_parameter.db_username.value : var.database.username
-    DB_PASSWORD       = local.use_ssm_for_password ? data.aws_ssm_parameter.db_password.value : var.database.password
+    DB_USERNAME       = data.aws_ssm_parameter.db_username.name
+    DB_PASSWORD       = data.aws_ssm_parameter.db_password.name
     REGION            = data.aws_region.current.name
   }
-  lambda_function_name = "${var.app_name}-schema-migrations"
+  lambda_function_name    = "${var.app_name}-schema-migrations"
+  migrations_dir          = dirname(var.migration_files)
+  migrations_path_pattern = basename(var.migration_files)
 }
 
 # -----------------------------------------------------------------------------
@@ -33,13 +33,11 @@ locals {
 data "aws_region" "current" {}
 
 data "aws_ssm_parameter" "db_username" {
-  count = local.use_ssm_for_username ? 0 : 1
-  name  = var.database.username
+  name = var.database.username
 }
 
 data "aws_ssm_parameter" "db_password" {
-  count = local.use_ssm_for_password ? 0 : 1
-  name  = var.database.password
+  name = var.database.password
 }
 
 data "aws_db_instance" "db_instance" {
@@ -80,7 +78,7 @@ resource "aws_s3_bucket" "migration_bucket_logs" {
 resource "aws_s3_bucket" "schema_migration_bucket" {
   bucket = var.migrations_bucket_name != null ? var.migrations_bucket_name : "${var.app_name}-schema-migrations"
   logging {
-    target_bucket = aws_s3_bucket.migration_bucket_logs[0].id
+    target_bucket = aws_s3_bucket.migration_bucket_logs.id
     target_prefix = "log/"
   }
   lifecycle_rule {
@@ -104,7 +102,7 @@ resource "aws_s3_bucket" "schema_migration_bucket" {
 }
 
 resource "aws_s3_bucket_public_access_block" "default" {
-  bucket                  = aws_s3_bucket.schema_migration_bucket[0].id
+  bucket                  = aws_s3_bucket.schema_migration_bucket.id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -112,18 +110,18 @@ resource "aws_s3_bucket_public_access_block" "default" {
 }
 
 resource "aws_s3_bucket_object" "migrations" {
-  for_each = fileset(dirname(var.migration_files), basename(var.migration_files))
+  for_each = fileset(local.migrations_dir, local.migrations_path_pattern)
 
-  bucket = aws_s3_bucket.schema_migration_bucket[0].bucket
+  bucket = aws_s3_bucket.schema_migration_bucket.bucket
   key    = each.value
-  source = var.migration_files + "/" + each.value
-  etag   = filemd5(each.value)
+  source = "${local.migrations_dir}/${each.value}"
+  etag   = filemd5("${local.migrations_dir}/${each.value}")
   tags   = var.tags
 }
 
 resource "aws_iam_policy" "s3_access" {
-  name        = "${aws_s3_bucket.schema_migration_bucket[0].bucket}-access"
-  description = "A policy to allow access to s3 to this bucket: ${aws_s3_bucket.schema_migration_bucket[0].bucket}"
+  name        = "${aws_s3_bucket.schema_migration_bucket.bucket}-access"
+  description = "A policy to allow access to s3 to this bucket: ${aws_s3_bucket.schema_migration_bucket.bucket}"
 
   policy = <<EOF
 {
@@ -135,7 +133,7 @@ resource "aws_iam_policy" "s3_access" {
         "s3:ListBucket"
       ],
       "Resource": [
-        "${aws_s3_bucket.schema_migration_bucket[0].arn}"
+        "${aws_s3_bucket.schema_migration_bucket.arn}"
       ]
     },
     {
@@ -145,7 +143,7 @@ resource "aws_iam_policy" "s3_access" {
         "s3:GetObjectVersion"
       ],
       "Resource": [
-        "${aws_s3_bucket.schema_migration_bucket[0].arn}/*"
+        "${aws_s3_bucket.schema_migration_bucket.arn}/*"
       ]
     }
   ]
@@ -154,7 +152,7 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "s3_access" {
-  policy_arn = aws_iam_policy.s3_access[0].arn
+  policy_arn = aws_iam_policy.s3_access.arn
   role       = aws_iam_role.migrations_lambda.name
 }
 # -----------------------------------------------------------------------------
@@ -175,6 +173,7 @@ data "aws_ecr_image" "migrations_lambda" {
 }
 
 resource "aws_lambda_function" "migrations_lambda" {
+  package_type  = "Image"
   function_name = local.lambda_function_name
   description   = "Runs schema migrations on ${data.aws_db_instance.db_instance.db_instance_identifier}"
   role          = aws_iam_role.migrations_lambda.arn

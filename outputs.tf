@@ -7,7 +7,7 @@ output "lambda_iam_role" {
 }
 
 output "schema_migrations_bucket" {
-  value = aws_s3_bucket.schema_migration_bucket[0]
+  value = aws_s3_bucket.schema_migration_bucket
 }
 
 output "cloudwatch_log_group" {

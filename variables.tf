@@ -18,15 +18,14 @@ variable "database" {
   type = object({
     # The rds instance identifier
     identifier = string
-    # The username for the DDL user
+    # The ssm path for the username of a DDL user
     username = string
-    # The password for the DDL user
+    # The ssm path for the password of a DDL user
     password = string
     # The name of the database or schema where the tables reside
     name = string
   })
   description = "The RDS database connection information"
-  sensitive   = true
 }
 
 variable "role_permissions_boundary_arn" {

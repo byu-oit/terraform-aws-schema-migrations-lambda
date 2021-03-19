@@ -10,6 +10,7 @@ module "acs" {
 variable "env" {
   description = "Deploy various environments by specifying an environment name"
   type        = string
+  default     = "edge" // For testing purposes
 }
 locals {
   repo = "terraform-aws-schema-migrations-lambda"
@@ -29,15 +30,16 @@ locals {
 # ------------------------------------------------------------
 module "schema_migrations_lambda" {
   //  source = "github.com/byu-oit/terraform-aws-schema-migrations-lambda>?ref=v1.0.0"
-  source          = "../" # for local testing during module development
+  source          = "../.." # for local testing during module development
   app_name        = "${local.name}-${var.env}"
   migration_files = "migrations/*.mig.js"
   database = {
     identifier = module.db.instance.id
-    username   = module.db.master_username_parameter.value
-    password   = module.db.master_password_parameter.value
+    username   = module.db.master_username_parameter.name
+    password   = module.db.master_password_parameter.name
     name       = module.db.instance.name
   }
+  role_permissions_boundary_arn = module.acs.role_permissions_boundary.arn
 }
 
 # ------------------------------------------------------------
@@ -53,7 +55,7 @@ module "db" {
   family                  = "postgres12"
   cloudwatch_logs_exports = ["postgresql", "upgrade"]
 
-  db_name             = "ensign_applications"
+  db_name             = "edge"
   ssm_prefix          = local.ssm_path
   subnet_ids          = module.acs.data_subnet_ids
   subnet_group_name   = module.acs.db_subnet_group_name

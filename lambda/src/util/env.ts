@@ -34,7 +34,7 @@ export function get (): EnvConfiguration {
       region: env.get('REGION').default('us-west-2').asString()
     }
     const db: DBEnvConfiguration = {
-      engine: env.get('DB_ENGINE').default('pg').asEnum(['mysql', 'pg']),
+      engine: env.get('DB_ENGINE').default('postgres').asEnum(['mysql', 'postgres']),
       host: env.get('DB_HOST').required().asString(),
       port: env.get('DB_PORT').required().asPortNumber(),
       database: env.get('DB_NAME').required().asString(),
