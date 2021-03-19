@@ -2,8 +2,8 @@ import { CodeDeployClient, PutLifecycleEventHookExecutionStatusCommand } from '@
 import { Umzug } from 'umzug'
 import * as env from './util/env'
 import { downloadMigrations } from './util/s3'
-import {clients} from './clients'
-import {storage} from './storage'
+import { clients } from './clients'
+import { storage } from './storage'
 
 const { aws: { region }, db, migrations } = env.get()
 const codeDeploy = new CodeDeployClient({ region })
@@ -76,5 +76,5 @@ export async function handler (event: Event): Promise<void> {
 }
 
 if (require.main === module) {
-  handler({})
+  handler({}).catch((e) => console.error(e))
 }
