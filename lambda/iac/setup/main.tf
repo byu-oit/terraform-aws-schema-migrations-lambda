@@ -12,20 +12,7 @@ module "ecr" {
   name                 = "schema-migrations-lambda"
   lifecycle_policy     = <<L_POLICY
 {
-  "rules": [
-    {
-      "rulePriority": 10,
-      "description": "Expire untagged images",
-      "selection": {
-        "tagStatus": "untagged",
-        "countType": "imageCountMoreThan",
-        "countNumber": 0
-      },
-      "action": {
-        "type": "expire"
-      }
-    }
-  ]
+  "rules": []
 }
 L_POLICY
   repository_policy = <<R_POLICY
