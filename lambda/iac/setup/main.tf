@@ -41,7 +41,7 @@ resource "aws_ecr_repository_policy" "repo_policy" {
   ]
 }
 R_POLICY
-  repository = local.name
+  repository = aws_ecr_repository.repo.name
 }
 
 output "ecr" {
