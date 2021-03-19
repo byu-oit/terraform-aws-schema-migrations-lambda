@@ -8,7 +8,6 @@
     "clean": "del-cli dist",
     "dev": "ts-node src/index.ts",
     "lint": "ts-standard",
-    "prepare": "husky install",
     "release": "./scripts/release.sh",
     "tag": "./scripts/tag.sh",
     "test": "echo \"No test specified\""
