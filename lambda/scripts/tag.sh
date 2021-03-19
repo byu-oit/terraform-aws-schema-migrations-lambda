@@ -18,13 +18,13 @@ do
     read -s -n 1 -p "$tag already exists. To force push, press <enter>" forcePush
     if [ $forcePush != '' ]; then continue; fi
 
-#    git tag -fa $tag -m "Update ${tag}"
-#    git push --force origin $tag
+    git tag -fa $tag -m "Update ${tag}"
+    git push --force origin $tag
     echo "Updated tag $tag"
   else
     # Tag does not yet exist
-#    git tag -a $tag -m "Release ${tag}"
-#    git push origin $tag
-    echo "Released tag $tag"
+    git tag -a $tag -m "Release ${tag}"
+    git push origin $tag
+    echo "Created tag $tag"
   fi
 done

@@ -1,7 +1,7 @@
-argNum=1
-if [ $# -ne $argNum ]
+argNum=0
+if [ $# -eq 0 ]
 then
-  echo "Expected $argNum arguments, but got $#."
+  echo "Nothing to release. Please supply at least one release parameter."
   exit 1
 fi
 
@@ -12,13 +12,17 @@ then
   exit 1
 fi
 
-if [[ -z $(git status -s) ]]
+if [[ -n $(git status -s) ]]
 then
-  git checkout $1
-  git merge master
-  git push origin $1
-  git checkout master
-else
   echo "Please commit any changes before merging to release"
   exit 1
 fi
+
+for b in "$@"
+do
+    git checkout $1
+  #  git merge master
+  #  git push origin $1
+    git checkout master
+  echo "Released branch ${$branch}"
+done
