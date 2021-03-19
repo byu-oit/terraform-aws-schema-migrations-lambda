@@ -26,15 +26,16 @@ const umzug = new Umzug({
 // export the type helper exposed by umzug, which will have the `context` argument typed correctly
 export type Migration = typeof umzug._types.migration
 
-export async function handler (event: {
+export type Event = {
   // Incoming event from ECS lifecycle Hook looks something like this
   // TODO - It would be nice to update this type if/when AWS supports this lambda event type
   DeploymentId: string
   LifecycleEventHookExecutionId: string
   Combined?: string
-}): Promise<void> {
+} | Record<string, unknown>
+
+export async function handler (event: Event): Promise<void> {
   let failed = false
-  const { DeploymentId: deploymentId, LifecycleEventHookExecutionId: executionId, Combined: combined } = event
 
   try {
     // Download migration files to the specified directory
@@ -62,13 +63,18 @@ export async function handler (event: {
     // Report lifecycle event hook status, if not combined
     // Note: This allows us to call the lambda from a lifecycle hook or invoke it directly. If invoked directly,
     // there is not need to respond to the code deploy lifecycle event.
-    if (combined != null) {
+    const { DeploymentId: deploymentId, LifecycleEventHookExecutionId: lifecycleEventHookExecutionId, Combined: combined } = event
+    if (combined != null && typeof deploymentId === 'string' && typeof lifecycleEventHookExecutionId === 'string') {
       const putLifecycleEventHookExecutionStatusCommand = new PutLifecycleEventHookExecutionStatusCommand({
-        deploymentId: deploymentId,
-        lifecycleEventHookExecutionId: executionId,
+        deploymentId,
+        lifecycleEventHookExecutionId,
         status: failed ? 'Failed' : 'Succeeded'
       })
       await codeDeploy.send(putLifecycleEventHookExecutionStatusCommand)
     }
   }
+}
+
+if (require.main === module) {
+  handler({})
 }
