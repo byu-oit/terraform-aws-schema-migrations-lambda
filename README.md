@@ -134,3 +134,27 @@ export const down: Migration = async ({client}) => {
 | schema_migrations_bucket | [object](https://www.terraform.io/docs/providers/aws/r/s3_bucket.html#attributes-reference)            | Created S3 Bucket where schema migration files are uploaded       |
 | cloudwatch_log_group     | [object](https://www.terraform.io/docs/providers/aws/r/cloudwatch_log_group.html#attributes-reference) | Created CloudWatch Log Group for the schema migration lambda logs |
 
+## Publishing
+
+Create and push a new tag representing the major (v1), minor (v1.0), and
+patch (v1.0.0) versions. If the tag already exists, you may force push a
+tag (see example below).
+
+Example:
+
+```bash
+# New version
+git tag -a v1.0.0 -m "Release v1.0.0"
+git push origin v1.0.0
+
+# Update minor version tag
+git tag -fa v1.0 -m "Update v1.0 tag"
+git push --force origin v1.0
+
+# Update major version tag
+git tag -fa v1 -m "Update v1 tag"
+git push --force origin v1
+
+# Git Tagging Docs: https://git-scm.com/book/en/v2/Git-Basics-Tagging
+```
+
