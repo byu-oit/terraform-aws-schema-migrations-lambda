@@ -4,6 +4,7 @@ import * as env from './util/env'
 import { downloadMigrations } from './util/s3'
 import { clients } from './clients'
 import { storage } from './storage'
+import { fetchParameters } from './util/ssm'
 
 const { aws: { region }, db, migrations } = env.get()
 const codeDeploy = new CodeDeployClient({ region })
@@ -38,12 +39,16 @@ export async function handler (event: Event): Promise<void> {
   let failed = false
 
   try {
+    // Resolve SSM parameter variables
+    // TODO - Allow all db variables to be ssm parameters, but this works for now
+    const [user, password] = await fetchParameters(db.user, db.password)
+
     // Download migration files to the specified directory
     await downloadMigrations(migrations.bucket, migrations.dir)
 
     // Establish database connection for supported clients using a GenericConnection interface
     // See ./src/clients/index for GenericConnection type
-    await client.connect(db)
+    await client.connect({...db, user, password})
 
     // Run schema migrations
     // It is best to write schema migrations as a transaction to avoid the possibility of partially executed
