@@ -31,12 +31,18 @@ module "schema_migrations_lambda" {
   app_name        = "${local.name}-${var.env}"
   migration_files = "migrations/*.mig.js"
   database = {
-    identifier = module.db.instance.id
-    username   = module.db.master_username_parameter.name
-    password   = module.db.master_password_parameter.name
-    name       = module.db.instance.name
+    identifier        = module.db.instance.id
+    ssm_username          = module.db.master_username_parameter.name
+    ssm_password          = module.db.master_password_parameter.name
+    name              = module.db.instance.name
+    security_group_id = module.db.security_group.id
   }
   role_permissions_boundary_arn = module.acs.role_permissions_boundary.arn
+  vpc_config = {
+    id                 = module.acs.vpc.id
+    subnet_ids         = module.acs.private_subnet_ids
+    security_group_ids = []
+  }
 }
 
 # ------------------------------------------------------------

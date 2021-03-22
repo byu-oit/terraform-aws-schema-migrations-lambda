@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 0.13"
+  required_version = ">= 0.14"
   required_providers {
     aws = ">= 3.19"
   }
@@ -26,18 +26,16 @@ locals {
 
 # -----------------------------------------------------------------------------
 # START OF DB PARAMETERS
-# Note if the username or password given starts with a `/` then we will look at
-# the parameter store to find the value
 # -----------------------------------------------------------------------------
 
 data "aws_region" "current" {}
 
 data "aws_ssm_parameter" "db_username" {
-  name = var.database.username
+  name = var.database.ssm_username
 }
 
 data "aws_ssm_parameter" "db_password" {
-  name = var.database.password
+  name = var.database.ssm_password
 }
 
 data "aws_db_instance" "db_instance" {
@@ -155,20 +153,17 @@ resource "aws_iam_role_policy_attachment" "s3_access" {
   policy_arn = aws_iam_policy.s3_access.arn
   role       = aws_iam_role.migrations_lambda.name
 }
-# -----------------------------------------------------------------------------
-# END OF LOCAL FILES
-# -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
 # START OF LAMBDA FUNCTION
 # -----------------------------------------------------------------------------
 
 data "aws_ecr_repository" "migrations_lambda" {
-  name = local.ecr_repo # Must match the name in /iac/set/main.tf#ecr.name
+  name = local.ecr_repo # Must match the name in /iac/setup/main.tf#ecr.name
 }
 
 data "aws_ecr_image" "migrations_lambda" {
-  repository_name = local.ecr_repo # Must match the name in /iac/set/main.tf#ecr.name
+  repository_name = local.ecr_repo # Must match the name in /iac/setup/main.tf#ecr.name
   image_tag       = local.ecr_image_tag
 }
 
@@ -180,16 +175,49 @@ resource "aws_lambda_function" "migrations_lambda" {
   image_uri     = "${data.aws_ecr_repository.migrations_lambda.repository_url}:${data.aws_ecr_image.migrations_lambda.image_tag}"
   runtime       = null
   handler       = null
-  timeout       = var.timeout
+  timeout       = 900 # Setting this to the max makes the most sense for schema migrations
   memory_size   = var.memory_size
+
   environment {
     variables = local.lambda_env_variables
   }
+
+  dynamic "vpc_config" {
+    for_each = var.vpc_config == null ? [] : [var.vpc_config]
+    content {
+      subnet_ids         = var.vpc_config.subnet_ids
+      security_group_ids = concat([aws_security_group.migrations_lambda_sg.id], var.vpc_config.security_group_ids)
+    }
+  }
+
   tags = var.tags
 
   depends_on = [
     aws_cloudwatch_log_group.lambda_logs
   ]
+}
+
+resource "aws_security_group" "migrations_lambda_sg" {
+  name        = "${var.app_name}-schema-migrations"
+  description = "Controls access to the Schema Migrations Lambda"
+  vpc_id      = var.vpc_config.id
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = var.tags
+}
+
+resource "aws_security_group_rule" "migrations_lambda_sg_rule" {
+  description              = "Allows the Schema Migrations Lambda to communicate with the RDS instance"
+  from_port                = data.aws_db_instance.db_instance.port
+  protocol                 = "tcp"
+  security_group_id        = var.database.security_group_id
+  to_port                  = data.aws_db_instance.db_instance.port
+  type                     = "ingress"
+  source_security_group_id = aws_security_group.migrations_lambda_sg.id
 }
 
 resource "aws_iam_role" "migrations_lambda" {
@@ -212,6 +240,12 @@ resource "aws_iam_role" "migrations_lambda" {
   ]
 }
 EOF
+}
+
+// Gives the schema migration lambda permission to execute with the any VPC where placed
+resource "aws_iam_role_policy_attachment" "vpc_access" {
+  role       = aws_iam_role.migrations_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 }
 
 resource "aws_iam_role_policy" "migrations_lambda" {
@@ -246,6 +280,3 @@ resource "aws_cloudwatch_log_group" "lambda_logs" {
   retention_in_days = var.log_retention_in_days
   tags              = var.tags
 }
-# -----------------------------------------------------------------------------
-# END OF LAMBDA FUNCTION
-# -----------------------------------------------------------------------------

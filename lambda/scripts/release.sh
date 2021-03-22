@@ -19,9 +19,17 @@ fi
 
 for b in "$@"
 do
-    git checkout -q -B $b
-    git merge master
-    git push origin $b
-    echo "Released branch $b"
-    git checkout -q master
+  if [[ `git branch --list $b`]]
+  then
+    # Tag already exists
+    read -s -n 1 -p "$b already exists. To confirm the merge, press <enter>" overwrite
+    if [ $overwrite != '' ]; then continue; fi
+  fi
+
+  # Push the
+  git checkout -q -B $b
+  git merge master
+  git push origin $b
+  echo "Released branch $b"
+  git checkout -q master
 done

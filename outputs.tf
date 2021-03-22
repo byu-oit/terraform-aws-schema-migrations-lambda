@@ -1,5 +1,6 @@
 output "lambda_function" {
-  value = aws_lambda_function.migrations_lambda
+  value     = aws_lambda_function.migrations_lambda
+  sensitive = true
 }
 
 output "lambda_iam_role" {

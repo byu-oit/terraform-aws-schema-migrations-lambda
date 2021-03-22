@@ -19,30 +19,35 @@ variable "database" {
     # The rds instance identifier
     identifier = string
     # The ssm path for the username of a DDL user
-    username = string
+    ssm_username = string
     # The ssm path for the password of a DDL user
-    password = string
+    ssm_password = string
     # The name of the database or schema where the tables reside
     name = string
+    # The security group id where the schema migration lambda access rule should be added
+    security_group_id = string
   })
   description = "The RDS database connection information"
 }
 
+variable "vpc_config" {
+  description = "VPC configuration to allow your Lambda function to access your RDS instance"
+  type = object({
+    id                 = string
+    security_group_ids = list(string)
+    subnet_ids         = list(string)
+  })
+}
+
 variable "role_permissions_boundary_arn" {
   type        = string
-  description = "ARN of the IAM Role permissions boundary to place on each IAM role created."
+  description = "ARN of the IAM Role permissions boundary to place on each IAM role created"
 }
 
 variable "log_retention_in_days" {
   type        = number
-  description = "CloudWatch log group retention in days. Defaults to 7."
+  description = "CloudWatch log group retention in days. Defaults to 7"
   default     = 7
-}
-
-variable "tags" {
-  type        = map(string)
-  description = "A map of AWS Tags to attach to each resource created"
-  default     = {}
 }
 
 variable "memory_size" {
@@ -51,8 +56,8 @@ variable "memory_size" {
   default     = 128
 }
 
-variable "timeout" {
-  type        = number
-  description = "The max number of seconds the lambda will run for without stopping"
-  default     = 900
+variable "tags" {
+  type        = map(string)
+  description = "A map of AWS Tags to attach to each resource created"
+  default     = {}
 }
