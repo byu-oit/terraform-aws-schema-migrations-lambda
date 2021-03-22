@@ -48,7 +48,7 @@ export async function handler (event: Event): Promise<void> {
 
     // Establish database connection for supported clients using a GenericConnection interface
     // See ./src/clients/index for GenericConnection type
-    await client.connect({...db, user, password})
+    await client.connect({ ...db, user, password })
 
     // Run schema migrations
     // It is best to write schema migrations as a transaction to avoid the possibility of partially executed
