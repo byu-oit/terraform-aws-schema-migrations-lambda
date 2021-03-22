@@ -19,11 +19,11 @@ fi
 
 for b in "$@"
 do
-  if [[ `git branch --list $b`]]
+  if [[ `git branch --list $b` ]]
   then
     # Tag already exists
     read -s -n 1 -p "$b already exists. To confirm the merge, press <enter>" overwrite
-    if [ $overwrite != '' ]; then continue; fi
+    if [[ $overwrite != '' ]]; then continue; fi
   fi
 
   # Push the
