@@ -269,6 +269,16 @@ resource "aws_iam_role_policy" "migrations_lambda" {
       "Action": "codedeploy:PutLifecycleEventHookExecutionStatus",
       "Resource": "*",
       "Effect": "Allow"
+    },
+    {
+      "Action": "ssm:GetParameter",
+      "Resource": "${data.aws_ssm_parameter.db_username.arn}",
+      "Effect": "Allow"
+    },
+    {
+      "Action": "ssm:GetParameter",
+      "Resource": "${data.aws_ssm_parameter.db_password.arn}",
+      "Effect": "Allow"
     }
   ]
 }

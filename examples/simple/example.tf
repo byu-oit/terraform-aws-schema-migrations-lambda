@@ -32,8 +32,8 @@ module "schema_migrations_lambda" {
   migration_files = "migrations/*.mig.js"
   database = {
     identifier        = module.db.instance.id
-    ssm_username          = module.db.master_username_parameter.name
-    ssm_password          = module.db.master_password_parameter.name
+    ssm_username      = module.db.master_username_parameter.name
+    ssm_password      = module.db.master_password_parameter.name
     name              = module.db.instance.name
     security_group_id = module.db.security_group.id
   }
