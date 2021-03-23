@@ -41,8 +41,7 @@ module "schema_migrations_lambda" {
   vpc_config = {
     id = module.acs.vpc.id
     subnet_ids = module.acs.private_subnet_ids
-    security_group_ids = 
-    []
+    security_group_ids = []
   }
 }
 ```
@@ -73,8 +72,8 @@ migration_files = "../migrations/*.mig.js"
 ```
 
 The resulting set of files that the migration lambda would run would be:
-- 20210312-initialize.mig.js
-- 20210412-add-classes-table.mig.js
+- 1.0.0__init.mig.js
+- 1.1.0__add_classes_table.mig.js
 
 For more information on the pattern/glob matching syntax, please see the
 [Terraform `fileset` function docs](https://www.terraform.io/docs/language/functions/fileset.html).
