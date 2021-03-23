@@ -26,7 +26,7 @@ locals {
 # Start of Schema Migrations Lambda
 # ------------------------------------------------------------
 module "schema_migrations_lambda" {
-  //  source = "github.com/byu-oit/terraform-aws-schema-migrations-lambda>?ref=v1.0.0"
+  //  source = "github.com/byu-oit/terraform-aws-schema-migrations-lambda?ref=v1.0.0"
   source          = "../.." # for local testing during module development
   app_name        = "${local.name}-${var.env}"
   migration_files = "migrations/*.mig.js"

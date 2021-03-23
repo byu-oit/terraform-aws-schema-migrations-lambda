@@ -28,7 +28,7 @@ module.
 
 ```hcl
 module "schema_migrations_lambda" {
-  source = "github.com/byu-oit/terraform-aws-schema-migrations-lambda>?ref=v1.0.0"
+  source = "github.com/byu-oit/terraform-aws-schema-migrations-lambda?ref=v1.0.0"
   app_name = "${local.name}-${var.env}"
   migration_files = "migrations/*.mig.js"
   database = {
