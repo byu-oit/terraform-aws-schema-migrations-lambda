@@ -92,11 +92,11 @@ A migration file must export an `up` and `down` method.
 
 ```js
 // 1.0.0__init.mig.js
-module.exports.up = async ({client}) => {
-    await client.query('create table if not exists users(id int, name text);')
+exports.up = async ({context: {client}}) => {
+    await client.query('create table if not exists users (id int, name text);')
 }
 
-module.exports.down = async ({client}) => {
+exports.down = async ({context: {client}}) => {
     await client.query('drop table users;')
 }
 ```
@@ -105,12 +105,17 @@ module.exports.down = async ({client}) => {
 
 ```ts
 // 1.0.0__init.mig.ts
-import { Migration } from '../umzug' // For correct function typings
-export const up: Migration = async ({client}) => {
+import {Connection} from 'mysql'
+import {MigrationParams} from 'umzug'
+import {StorageContext} from 'byu-oit/terraform-aws-schema-migrations-lambda/lambda/dist/storage'
+
+type Migration = (params: MigrationParams<StorageContext<Connection>>) => Promise<unknown>
+
+export const up: Migration = async ({context: {client}}) => {
     await client.query('create table if not exists users(id int, name text);')
 }
 
-export const down: Migration = async ({client}) => {
+export const down: Migration = async ({context: {client}}) => {
     await client.query('drop table users;')
 }
 ```
