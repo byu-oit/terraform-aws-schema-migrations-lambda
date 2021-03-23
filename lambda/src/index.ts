@@ -9,24 +9,6 @@ import { fetchParameters } from './util/ssm'
 const { aws: { region }, db, migrations } = env.get()
 const codeDeploy = new CodeDeployClient({ region })
 
-// Get supported client
-const client = clients[db.engine]
-if (client == null) throw Error(`Unsupported database engine "${db.engine}"`)
-
-// Setup schema migrations
-// Umzug instance docs: https://github.com/sequelize/umzug/blob/master/src/types.ts
-const umzug = new Umzug({
-  storage: storage[db.engine],
-  logger: console,
-  context: { client, table: migrations.table },
-  migrations: {
-    glob: migrations.dir + '/*' // All files uploaded to the s3 bucket
-  }
-})
-
-// export the type helper exposed by umzug, which will have the `context` argument typed correctly
-export type Migration = typeof umzug._types.migration
-
 export type Event = {
   // Incoming event from ECS lifecycle Hook looks something like this
   // TODO - It would be nice to update this type if/when AWS supports this lambda event type
@@ -37,6 +19,7 @@ export type Event = {
 
 export async function handler (event: Event): Promise<void> {
   let failed = false
+  const genericClient = clients[db.engine]
 
   try {
     // Resolve SSM parameter variables
@@ -46,9 +29,27 @@ export async function handler (event: Event): Promise<void> {
     // Download migration files to the specified directory
     await downloadMigrations(migrations.bucket, migrations.dir)
 
+    // Check for supported client
+    if (genericClient == null) {
+      throw Error(`Unsupported database engine "${db.engine}"`)
+    }
+
     // Establish database connection for supported clients using a GenericConnection interface
     // See ./src/clients/index for GenericConnection type
-    await client.connect({ ...db, user, password })
+    // const client = await genericClient.connect({ ...db }) // For local testing only
+    const client = await genericClient.connect({ ...db, user, password })
+
+    // Setup schema migrations
+    // Umzug instance docs: https://github.com/sequelize/umzug/blob/master/src/types.ts
+    const umzug = new Umzug({
+      storage: storage[db.engine],
+      logger: console,
+      context: { client, table: migrations.table },
+      migrations: {
+        // glob: ['../../examples/simple/migrations/*.js', { cwd: __dirname }] // For local testing only
+        glob: migrations.dir + '/*' // All files uploaded to the s3 bucket
+      }
+    })
 
     // Run schema migrations
     // It is best to write schema migrations as a transaction to avoid the possibility of partially executed
@@ -63,7 +64,9 @@ export async function handler (event: Event): Promise<void> {
     throw e
   } finally {
     // Close database connection
-    await client.close()
+    if (genericClient != null) {
+      await genericClient.close()
+    }
 
     // Report lifecycle event hook status, if not combined
     // Note: This allows us to call the lambda from a lifecycle hook or invoke it directly. If invoked directly,

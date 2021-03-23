@@ -6,7 +6,7 @@
   "scripts": {
     "compile": "npm run clean && tsc",
     "clean": "del-cli dist",
-    "dev": "ts-node src/index.ts",
+    "dev": "ts-node -r dotenv/config src/index.ts",
     "lint": "ts-standard",
     "release": "./scripts/release.sh",
     "tag": "./scripts/tag.sh",
@@ -36,6 +36,7 @@
     "@types/pg": "^7.14.11",
     "cpy-cli": "^3.1.1",
     "del-cli": "^3.0.1",
+    "dotenv": "^8.2.0",
     "source-map-support": "^0.5.19",
     "ts-node": "^9.1.1",
     "ts-standard": "^10.0.0",
