@@ -1,22 +1,23 @@
 terraform {
   required_version = ">= 0.14"
   required_providers {
-    aws = ">= 3.19"
+    aws = {
+      version = "~> 3"
+    }
   }
 }
 
 locals {
-  ecr_repo = "schema-migrations-lambda"
-  //  ecr_image_tag = "latest"
-  ecr_image_tag = "edge" // Edge tag is for testing, use latest or another version tag
+  ecr_repo      = var.ecr_repo
+  ecr_image_tag = var.ecr_image_tag
   lambda_env_variables = {
     MIGRATIONS_BUCKET = aws_s3_bucket.schema_migration_bucket.bucket
-    DB_ENGINE         = data.aws_db_instance.db_instance.engine // Should be postgres or mysql
+    DB_ENGINE         = data.aws_db_instance.db_instance.engine # Should be postgres or mysql
     DB_HOST           = data.aws_db_instance.db_instance.address
     DB_PORT           = data.aws_db_instance.db_instance.port
-    DB_NAME           = var.database.name != null ? var.database.name : data.aws_db_instance.db_instance.db_name
-    DB_USERNAME       = data.aws_ssm_parameter.db_username.name
-    DB_PASSWORD       = data.aws_ssm_parameter.db_password.name
+    DB_NAME           = var.db_name != null ? var.db_name : data.aws_db_instance.db_instance.db_name
+    DB_USERNAME       = data.aws_ssm_parameter.db_ssm_username.name
+    DB_PASSWORD       = data.aws_ssm_parameter.db_ssm_password.name
     REGION            = data.aws_region.current.name
   }
   lambda_function_name    = "${var.app_name}-schema-migrations"
@@ -30,16 +31,16 @@ locals {
 
 data "aws_region" "current" {}
 
-data "aws_ssm_parameter" "db_username" {
-  name = var.database.ssm_username
+data "aws_ssm_parameter" "db_ssm_username" {
+  name = var.db_ssm_username
 }
 
-data "aws_ssm_parameter" "db_password" {
-  name = var.database.ssm_password
+data "aws_ssm_parameter" "db_ssm_password" {
+  name = var.db_ssm_password
 }
 
 data "aws_db_instance" "db_instance" {
-  db_instance_identifier = var.database.identifier
+  db_instance_identifier = var.db_identifier
 }
 
 # -----------------------------------------------------------------------------
@@ -182,12 +183,9 @@ resource "aws_lambda_function" "migrations_lambda" {
     variables = local.lambda_env_variables
   }
 
-  dynamic "vpc_config" {
-    for_each = var.vpc_config == null ? [] : [var.vpc_config]
-    content {
-      subnet_ids         = var.vpc_config.subnet_ids
-      security_group_ids = concat([aws_security_group.migrations_lambda_sg.id], var.vpc_config.security_group_ids)
-    }
+  vpc_config {
+    subnet_ids         = [var.vpc_subnet_ids[0]]
+    security_group_ids = compact(concat([aws_security_group.migrations_lambda_sg.id], var.vpc_security_group_ids))
   }
 
   tags = var.tags
@@ -200,7 +198,7 @@ resource "aws_lambda_function" "migrations_lambda" {
 resource "aws_security_group" "migrations_lambda_sg" {
   name        = "${var.app_name}-schema-migrations"
   description = "Controls access to the Schema Migrations Lambda"
-  vpc_id      = var.vpc_config.id
+  vpc_id      = var.vpc_id
   egress {
     from_port   = 0
     to_port     = 0
@@ -214,7 +212,7 @@ resource "aws_security_group_rule" "migrations_lambda_sg_rule" {
   description              = "Allows the Schema Migrations Lambda to communicate with the RDS instance"
   from_port                = data.aws_db_instance.db_instance.port
   protocol                 = "tcp"
-  security_group_id        = var.database.security_group_id
+  security_group_id        = var.db_security_group_id
   to_port                  = data.aws_db_instance.db_instance.port
   type                     = "ingress"
   source_security_group_id = aws_security_group.migrations_lambda_sg.id
@@ -242,7 +240,7 @@ resource "aws_iam_role" "migrations_lambda" {
 EOF
 }
 
-// Gives the schema migration lambda permission to execute with the any VPC where placed
+# Gives the schema migration lambda permission to execute with the any VPC where placed
 resource "aws_iam_role_policy_attachment" "vpc_access" {
   role       = aws_iam_role.migrations_lambda.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
@@ -272,12 +270,12 @@ resource "aws_iam_role_policy" "migrations_lambda" {
     },
     {
       "Action": "ssm:GetParameter",
-      "Resource": "${data.aws_ssm_parameter.db_username.arn}",
+      "Resource": "${data.aws_ssm_parameter.db_ssm_username.arn}",
       "Effect": "Allow"
     },
     {
       "Action": "ssm:GetParameter",
-      "Resource": "${data.aws_ssm_parameter.db_password.arn}",
+      "Resource": "${data.aws_ssm_parameter.db_ssm_password.arn}",
       "Effect": "Allow"
     }
   ]

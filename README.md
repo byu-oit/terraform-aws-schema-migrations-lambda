@@ -12,12 +12,6 @@ pull request (see [contributing](#contributing)).
 > than 15 minutes (see
 > [AWS Lambda enables functions that can run up to 15 minutes](https://aws.amazon.com/about-aws/whats-new/2018/10/aws-lambda-supports-functions-that-can-run-up-to-15-minutes/))
 
-## Requirements
-
-* Terraform >= 0.13
-* AWS Provider >= 3.0.0
-* Postgres or MySQL database
-
 ## Usage
 
 The following example is used in conjunction with the
@@ -31,20 +25,93 @@ module "schema_migrations_lambda" {
   source = "github.com/byu-oit/terraform-aws-schema-migrations-lambda?ref=v1.0.0"
   app_name = "${local.name}-${var.env}"
   migration_files = "migrations/*.mig.js"
-  database = {
-    identifier = module.db.instance.id
-    ssm_username = module.db.master_username_parameter.value
-    ssm_password = module.db.master_password_parameter.value
-    name = module.db.instance.name
-    security_group_id = module.db.security_group.id
-  }
-  vpc_config = {
-    id = module.acs.vpc.id
-    subnet_ids = module.acs.private_subnet_ids
-    security_group_ids = []
-  }
+  db_identifier = module.db.instance.id
+  db_ssm_username = module.db.master_username_parameter.value
+  db_ssm_password = module.db.master_password_parameter.value
+  db_name = module.db.instance.name
+  db_security_group_id = module.db.security_group.id
+  vpc_id = module.acs.vpc.id
+  vpc_subnet_ids = module.acs.private_subnet_ids
+  vpc_security_group_ids = []
 }
 ```
+
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.14 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 3 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 3 |
+
+## Modules
+
+No modules.
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_cloudwatch_log_group.lambda_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_iam_policy.s3_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_role.migrations_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy.migrations_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_iam_role_policy_attachment.s3_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.vpc_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_lambda_function.migrations_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
+| [aws_s3_bucket.migration_bucket_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
+| [aws_s3_bucket.schema_migration_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
+| [aws_s3_bucket_object.migrations](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_object) | resource |
+| [aws_s3_bucket_public_access_block.default](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
+| [aws_security_group.migrations_lambda_sg](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group_rule.migrations_lambda_sg_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+| [aws_db_instance.db_instance](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/db_instance) | data source |
+| [aws_ecr_image.migrations_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_image) | data source |
+| [aws_ecr_repository.migrations_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_repository) | data source |
+| [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
+| [aws_ssm_parameter.db_ssm_password](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
+| [aws_ssm_parameter.db_ssm_username](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_app_name"></a> [app\_name](#input\_app\_name) | Application name to give your schema migrations lambda function (e.g. hello-world-dev) | `string` | n/a | yes |
+| <a name="input_db_identifier"></a> [db\_identifier](#input\_db\_identifier) | Database identifier - name of the database | `string` | `null` | no |
+| <a name="input_db_name"></a> [db\_name](#input\_db\_name) | The name of the database or schema where the tables reside | `string` | `null` | no |
+| <a name="input_db_security_group_id"></a> [db\_security\_group\_id](#input\_db\_security\_group\_id) | The security group id where the schema migration lambda access rule should be added | `string` | `null` | no |
+| <a name="input_db_ssm_password"></a> [db\_ssm\_password](#input\_db\_ssm\_password) | The ssm path for the password of a DDL user | `string` | `null` | no |
+| <a name="input_db_ssm_username"></a> [db\_ssm\_username](#input\_db\_ssm\_username) | The ssm path for the username of a DDL user | `string` | `null` | no |
+| <a name="input_ecr_image_tag"></a> [ecr\_image\_tag](#input\_ecr\_image\_tag) | Edge tag is for testing, use latest or another version tag for default uses.s | `string` | `"latest"` | no |
+| <a name="input_ecr_repo"></a> [ecr\_repo](#input\_ecr\_repo) | Default ecr repo name for the lambda image build | `string` | `"schema-migrations-lambda"` | no |
+| <a name="input_log_retention_in_days"></a> [log\_retention\_in\_days](#input\_log\_retention\_in\_days) | CloudWatch log group retention in days. Defaults to 7 | `number` | `7` | no |
+| <a name="input_memory_size"></a> [memory\_size](#input\_memory\_size) | The size of the memory of the lambda | `number` | `128` | no |
+| <a name="input_migration_files"></a> [migration\_files](#input\_migration\_files) | Path and pattern to enumerate the schema migration files (e.g. ./migrations/dir/*.sql) | `string` | n/a | yes |
+| <a name="input_migrations_bucket_name"></a> [migrations\_bucket\_name](#input\_migrations\_bucket\_name) | The name of the S3 Bucket name where this module will upload the schema migrations directory (defaults to <app\_name>-schema-migrations) | `string` | `null` | no |
+| <a name="input_role_permissions_boundary_arn"></a> [role\_permissions\_boundary\_arn](#input\_role\_permissions\_boundary\_arn) | ARN of the IAM Role permissions boundary to place on each IAM role created | `string` | `null` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | A map of AWS Tags to attach to each resource created | `map(string)` | `{}` | no |
+| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID from which to run the Lambda Function | `string` | `null` | no |
+| <a name="input_vpc_security_group_ids"></a> [vpc\_security\_group\_ids](#input\_vpc\_security\_group\_ids) | SG to put the lambda function in. | `list(any)` | n/a | yes |
+| <a name="input_vpc_subnet_ids"></a> [vpc\_subnet\_ids](#input\_vpc\_subnet\_ids) | Subnet to put the lambda function in. | `list(any)` | n/a | yes |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_cloudwatch_log_group"></a> [cloudwatch\_log\_group](#output\_cloudwatch\_log\_group) | lambda function cloudwatch logs path |
+| <a name="output_lambda_function"></a> [lambda\_function](#output\_lambda\_function) | lambda function name |
+| <a name="output_lambda_iam_role"></a> [lambda\_iam\_role](#output\_lambda\_iam\_role) | lambda function role |
+| <a name="output_schema_migrations_bucket"></a> [schema\_migrations\_bucket](#output\_schema\_migrations\_bucket) | lambda function migrations bucket name |
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+
+## Migration Files
 
 You will need to specify which files you'd like to consider for the
 migration. One way to accomplish this is to place all migrations in a
@@ -120,55 +187,6 @@ export const down: Migration = async ({context: {client}}) => {
 }
 ```
 
-## Inputs
-
-| Name                          | Type                                    | Description                                                                                                                             | Default      |
-|:------------------------------|:----------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------|:-------------|
-| app_name                      | string                                  | Application name to give the schema migrations lambda function (e.g. `hello-world-dev`)                                                 | **REQUIRED** |
-| migration_files               | string                                  | Path and pattern to enumerate the schema migration files (e.g. `./migrations/dir/*.sql`)                                                | **REQUIRED** |
-| migrations_bucket_name        | string                                  | The name of the S3 Bucket name where this module will upload the schema migrations directory (defaults to <app_name>-schema-migrations) | null         |
-| database                      | [object](#database-definition)          | The RDS database connection information                                                                                                 | **REQUIRED** |
-| vpc_config                    | [object](#vpc-configuration-definition) | VPC configuration to allow your Lambda function to access your RDS instance                                                             | **REQUIRED** |
-| role_permissions_boundary_arn | string                                  | ARN of the IAM Role permissions boundary to place on each IAM role created                                                              | **REQUIRED** |
-| log_retention_in_days         | number                                  | CloudWatch log group retention in days                                                                                                  | 7            |
-| tags                          | map(string)                             | A map of AWS Tags to attach to each resource created                                                                                    | {}           |
-| memory_size                   | number                                  | The size of the memory of the lambda                                                                                                    | 128          |
-
-#### Database Definition
-
-Specify the database connection information for the schema migration
-lambda to connect to the desired RDS instance. The authentication
-credentials should belong to a user that has the necessary permissions
-to perform the schema migrations specified in your migrations directory.
-
-| Name              | Type   | Description                                                                                                                                                                                               | Default                                                                                                                                   |
-|:------------------|:-------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------|
-| identifier        | string | The [rds instance identifier](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/db_instance#db_instance_identifier)                                                          | **REQUIRED**                                                                                                                              |
-| ssm_username      | string | The SSM parameter path for the username of a DDL user [AWS SSM parameter name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter#name) (e.g. /my/ssm/username) | **REQUIRED**                                                                                                                              |
-| ssm_password      | string | The SSM parameter path for the password of a DDL user [AWS SSM parameter name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter#name) (e.g. /my/ssm/password) | **REQUIRED**                                                                                                                              |
-| name              | string | The name of the database or schema where the tables reside                                                                                                                                                | [aws_db_instance.db_instance.db_name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/db_instance#db_name) |
-| security_group_id | string | The security group id where the schema migration lambda access rule should be added                                                                                                                       | **REQUIRED**                                                                                                                              |
-
-#### VPC Configuration Definition
-
-The schema migrations lambda must run inside the same VPC as the RDS
-instance to which it will apply the schema migrations.
-
-| Name               | Type         | Definition                                                      |
-|:-------------------|:-------------|:----------------------------------------------------------------|
-| id                 | string       | The ID of the VPC where this schema migration lambda should run |
-| subnet_ids         | list(string) | List of subnet IDs for the Lambda service                       |
-| security_group_ids | list(string) | List of extra security group IDs to attach                      |
-
-## Outputs
-
-| Name                     | Type                                                                                                   | Description                                                       |
-|:-------------------------|:-------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------|
-| lambda_function          | [object](https://www.terraform.io/docs/providers/aws/r/lambda_function.html#attributes-reference)      | Created lambda function that runs the schema migrations           |
-| lambda_iam_role          | [object](https://www.terraform.io/docs/providers/aws/r/iam_role.html#attributes-reference)             | Created IAM role for the `lambda_function`                        |
-| schema_migrations_bucket | [object](https://www.terraform.io/docs/providers/aws/r/s3_bucket.html#attributes-reference)            | Created S3 Bucket where schema migration files are uploaded       |
-| cloudwatch_log_group     | [object](https://www.terraform.io/docs/providers/aws/r/cloudwatch_log_group.html#attributes-reference) | Created CloudWatch Log Group for the schema migration lambda logs |
-
 ## Contributing
 
 To add additional engine support, add a new client that implements a
@@ -223,4 +241,3 @@ npm run release -- edge latest
 # Create new git tags (this will fire the CI to create new ECR tags)
 npm run tag -- v1 v1.0 v1.0.0
 ```
-

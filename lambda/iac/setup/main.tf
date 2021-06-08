@@ -1,5 +1,10 @@
 terraform {
-  required_version = ">=0.13.0"
+  required_version = ">= 0.14"
+  required_providers {
+    aws = {
+      version = "~> 3"
+    }
+  }
 }
 
 provider "aws" {
@@ -42,8 +47,4 @@ resource "aws_ecr_repository_policy" "repo_policy" {
 }
 R_POLICY
   repository = aws_ecr_repository.repo.name
-}
-
-output "ecr" {
-  value = aws_ecr_repository.repo.repository_url
 }
