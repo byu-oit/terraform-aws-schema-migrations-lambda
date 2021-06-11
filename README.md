@@ -76,8 +76,6 @@ No modules.
 | [aws_ecr_image.migrations_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_image) | data source |
 | [aws_ecr_repository.migrations_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecr_repository) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
-| [aws_ssm_parameter.db_ssm_password](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
-| [aws_ssm_parameter.db_ssm_username](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
 
 ## Inputs
 
@@ -88,7 +86,9 @@ No modules.
 | <a name="input_db_name"></a> [db\_name](#input\_db\_name) | The name of the database or schema where the tables reside | `string` | `null` | no |
 | <a name="input_db_security_group_id"></a> [db\_security\_group\_id](#input\_db\_security\_group\_id) | The security group id where the schema migration lambda access rule should be added | `string` | `null` | no |
 | <a name="input_db_ssm_password"></a> [db\_ssm\_password](#input\_db\_ssm\_password) | The ssm path for the password of a DDL user | `string` | `null` | no |
+| <a name="input_db_ssm_password_arn"></a> [db\_ssm\_password\_arn](#input\_db\_ssm\_password\_arn) | The ssm arn for the password of a DDL user | `string` | `null` | no |
 | <a name="input_db_ssm_username"></a> [db\_ssm\_username](#input\_db\_ssm\_username) | The ssm path for the username of a DDL user | `string` | `null` | no |
+| <a name="input_db_ssm_username_arn"></a> [db\_ssm\_username\_arn](#input\_db\_ssm\_username\_arn) | The ssm arn for the username of a DDL user | `string` | `null` | no |
 | <a name="input_ecr_image_tag"></a> [ecr\_image\_tag](#input\_ecr\_image\_tag) | Edge tag is for testing, use latest or another version tag for default uses.s | `string` | `"latest"` | no |
 | <a name="input_ecr_repo"></a> [ecr\_repo](#input\_ecr\_repo) | Default ecr repo name for the lambda image build | `string` | `"schema-migrations-lambda"` | no |
 | <a name="input_log_retention_in_days"></a> [log\_retention\_in\_days](#input\_log\_retention\_in\_days) | CloudWatch log group retention in days. Defaults to 7 | `number` | `7` | no |

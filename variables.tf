@@ -32,6 +32,18 @@ variable "db_ssm_password" {
   default     = null
 }
 
+variable "db_ssm_username_arn" {
+  type        = string
+  description = "The ssm arn for the username of a DDL user"
+  default     = null
+}
+
+variable "db_ssm_password_arn" {
+  type        = string
+  description = "The ssm arn for the password of a DDL user"
+  default     = null
+}
+
 variable "db_name" {
   type        = string
   description = "The name of the database or schema where the tables reside"

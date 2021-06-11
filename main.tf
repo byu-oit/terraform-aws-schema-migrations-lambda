@@ -16,8 +16,8 @@ locals {
     DB_HOST           = data.aws_db_instance.db_instance.address
     DB_PORT           = data.aws_db_instance.db_instance.port
     DB_NAME           = var.db_name != null ? var.db_name : data.aws_db_instance.db_instance.db_name
-    DB_USERNAME       = data.aws_ssm_parameter.db_ssm_username.name
-    DB_PASSWORD       = data.aws_ssm_parameter.db_ssm_password.name
+    DB_USERNAME       = var.db_ssm_username
+    DB_PASSWORD       = var.db_ssm_password
     REGION            = data.aws_region.current.name
   }
   lambda_function_name    = "${var.app_name}-schema-migrations"
@@ -30,14 +30,6 @@ locals {
 # -----------------------------------------------------------------------------
 
 data "aws_region" "current" {}
-
-data "aws_ssm_parameter" "db_ssm_username" {
-  name = var.db_ssm_username
-}
-
-data "aws_ssm_parameter" "db_ssm_password" {
-  name = var.db_ssm_password
-}
 
 data "aws_db_instance" "db_instance" {
   db_instance_identifier = var.db_identifier
@@ -270,12 +262,12 @@ resource "aws_iam_role_policy" "migrations_lambda" {
     },
     {
       "Action": "ssm:GetParameter",
-      "Resource": "${data.aws_ssm_parameter.db_ssm_username.arn}",
+      "Resource": "${var.db_ssm_username_arn}",
       "Effect": "Allow"
     },
     {
       "Action": "ssm:GetParameter",
-      "Resource": "${data.aws_ssm_parameter.db_ssm_password.arn}",
+      "Resource": "${var.db_ssm_password_arn}",
       "Effect": "Allow"
     }
   ]
