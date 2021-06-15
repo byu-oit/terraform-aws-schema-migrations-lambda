@@ -48,7 +48,7 @@ module "schema_migrations_lambda" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 3 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 3.45.0 |
 
 ## Modules
 
@@ -82,6 +82,7 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_app_name"></a> [app\_name](#input\_app\_name) | Application name to give your schema migrations lambda function (e.g. hello-world-dev) | `string` | n/a | yes |
+| <a name="input_db_engine"></a> [db\_engine](#input\_db\_engine) | The engine of the database - mysql or postgres, if set, otherwise we pick it up automatically, but this can break for aurora-postgresql for example hence we make this a potential input | `string` | `null` | no |
 | <a name="input_db_identifier"></a> [db\_identifier](#input\_db\_identifier) | Database identifier - name of the database | `string` | `null` | no |
 | <a name="input_db_name"></a> [db\_name](#input\_db\_name) | The name of the database or schema where the tables reside | `string` | `null` | no |
 | <a name="input_db_security_group_id"></a> [db\_security\_group\_id](#input\_db\_security\_group\_id) | The security group id where the schema migration lambda access rule should be added | `string` | `null` | no |

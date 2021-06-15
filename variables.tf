@@ -50,6 +50,12 @@ variable "db_name" {
   default     = null
 }
 
+variable "db_engine" {
+  type        = string
+  description = "The engine of the database - mysql or postgres, if set, otherwise we pick it up automatically, but this can break for aurora-postgresql for example hence we make this a potential input"
+  default     = null
+}
+
 variable "db_security_group_id" {
   type        = string
   description = "The security group id where the schema migration lambda access rule should be added"

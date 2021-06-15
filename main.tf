@@ -12,7 +12,7 @@ locals {
   ecr_image_tag = var.ecr_image_tag
   lambda_env_variables = {
     MIGRATIONS_BUCKET = aws_s3_bucket.schema_migration_bucket.bucket
-    DB_ENGINE         = data.aws_db_instance.db_instance.engine # Should be postgres or mysql
+    DB_ENGINE         = var.db_engine != null ? var.db_engine : data.aws_db_instance.db_instance.engine # Should be postgres or mysql
     DB_HOST           = data.aws_db_instance.db_instance.address
     DB_PORT           = data.aws_db_instance.db_instance.port
     DB_NAME           = var.db_name != null ? var.db_name : data.aws_db_instance.db_instance.db_name
