@@ -43,7 +43,7 @@ data "aws_db_instance" "db_instance" {
 data "aws_caller_identity" "current" {}
 
 resource "aws_s3_bucket" "migration_bucket_logs" {
-  bucket = "${var.app_name}-schema-migrations-${data.aws_caller_identity.current.account_id}-logs"
+  bucket = var.migrations_bucket_name != null ? "${var.migrations_bucket_name}-logs" : "${var.app_name}-schema-migrations-${data.aws_caller_identity.current.account_id}-logs"
   acl    = "log-delivery-write"
   tags   = var.tags
 
