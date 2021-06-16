@@ -92,8 +92,16 @@ resource "aws_s3_bucket" "schema_migration_bucket" {
   tags = var.tags
 }
 
-resource "aws_s3_bucket_public_access_block" "default" {
+resource "aws_s3_bucket_public_access_block" "migrations" {
   bucket                  = aws_s3_bucket.schema_migration_bucket.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_public_access_block" "logs" {
+  bucket                  = aws_s3_bucket.migration_bucket_logs.id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
