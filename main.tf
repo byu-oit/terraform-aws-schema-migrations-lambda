@@ -36,8 +36,8 @@ locals {
   lambda_function_name    = "${var.app_name}-schema-migrations"
   migrations_dir          = dirname(var.migration_files)
   migrations_path_pattern = basename(var.migration_files)
-  db_ssm_username_arn     = var.db_ssm_username_arn == null ? "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${var.db_ssm_username}" : var.db_ssm_username_arn
-  db_ssm_password_arn     = var.db_ssm_password_arn == null ? "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${var.db_ssm_password}" : var.db_ssm_password_arn
+  db_ssm_username_arn     = var.db_ssm_username_arn == null ? "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.db_ssm_username}" : var.db_ssm_username_arn
+  db_ssm_password_arn     = var.db_ssm_password_arn == null ? "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${var.db_ssm_password}" : var.db_ssm_password_arn
 }
 
 # -----------------------------------------------------------------------------
