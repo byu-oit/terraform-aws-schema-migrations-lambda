@@ -10,7 +10,7 @@ terraform {
 locals {
   ecr_repo      = var.ecr_repo
   ecr_image_tag = var.ecr_image_tag
-  lambda_env_variables = {
+  lambda_env_variables_base = {
     MIGRATIONS_BUCKET = aws_s3_bucket.schema_migration_bucket.bucket
     DB_ENGINE         = var.db_engine != null ? var.db_engine : data.aws_db_instance.db_instance.engine # Should be postgres or mysql
     DB_HOST           = data.aws_db_instance.db_instance.address
@@ -20,6 +20,11 @@ locals {
     DB_PASSWORD       = var.db_ssm_password
     REGION            = data.aws_region.current.name
   }
+  lambda_env_variables_ssl = {
+    PGSSLMODE           = "require"
+    NODE_EXTRA_CA_CERTS = "/var/task/rds-ca-2019-root.pem"
+  }
+  lambda_env_variables    = var.db_ssl_mode == true ? merge(local.lambda_env_variables_base, local.lambda_env_variables_ssl) : local.lambda_env_variables_base
   lambda_function_name    = "${var.app_name}-schema-migrations"
   migrations_dir          = dirname(var.migration_files)
   migrations_path_pattern = basename(var.migration_files)

@@ -68,7 +68,8 @@ No modules.
 | [aws_s3_bucket.migration_bucket_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket.schema_migration_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket_object.migrations](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_object) | resource |
-| [aws_s3_bucket_public_access_block.default](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
+| [aws_s3_bucket_public_access_block.logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
+| [aws_s3_bucket_public_access_block.migrations](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
 | [aws_security_group.migrations_lambda_sg](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_security_group_rule.migrations_lambda_sg_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
@@ -86,6 +87,7 @@ No modules.
 | <a name="input_db_identifier"></a> [db\_identifier](#input\_db\_identifier) | Database identifier - name of the database | `string` | `null` | no |
 | <a name="input_db_name"></a> [db\_name](#input\_db\_name) | The name of the database or schema where the tables reside | `string` | `null` | no |
 | <a name="input_db_security_group_id"></a> [db\_security\_group\_id](#input\_db\_security\_group\_id) | The security group id where the schema migration lambda access rule should be added | `string` | `null` | no |
+| <a name="input_db_ssl_mode"></a> [db\_ssl\_mode](#input\_db\_ssl\_mode) | Whether to expect SSL or not for the database connection | `bool` | `false` | no |
 | <a name="input_db_ssm_password"></a> [db\_ssm\_password](#input\_db\_ssm\_password) | The ssm path for the password of a DDL user | `string` | `null` | no |
 | <a name="input_db_ssm_password_arn"></a> [db\_ssm\_password\_arn](#input\_db\_ssm\_password\_arn) | The ssm arn for the password of a DDL user | `string` | `null` | no |
 | <a name="input_db_ssm_username"></a> [db\_ssm\_username](#input\_db\_ssm\_username) | The ssm path for the username of a DDL user | `string` | `null` | no |

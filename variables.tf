@@ -62,6 +62,12 @@ variable "db_security_group_id" {
   default     = null
 }
 
+variable "db_ssl_mode" {
+  type        = bool
+  description = "Whether to expect SSL or not for the database connection"
+  default     = false
+}
+
 variable "vpc_id" {
   type        = string
   description = "VPC ID from which to run the Lambda Function"

@@ -50,6 +50,9 @@ COPY --from=unittest /noop /
 FROM test as release
 ENV NODE_ENV="production"
 
+# CA cert for SSL
+COPY rds-ca-2019-root.pem ./
+
 # Pass in the lambda handler function location argument
 CMD ["dist/index.handler"]
 
