@@ -7,6 +7,14 @@ terraform {
   }
 }
 
+data "aws_region" "current" {}
+
+data "aws_caller_identity" "current" {}
+
+data "aws_db_instance" "db_instance" {
+  db_instance_identifier = var.db_identifier
+}
+
 locals {
   ecr_repo      = var.ecr_repo
   ecr_image_tag = var.ecr_image_tag
@@ -28,16 +36,8 @@ locals {
   lambda_function_name    = "${var.app_name}-schema-migrations"
   migrations_dir          = dirname(var.migration_files)
   migrations_path_pattern = basename(var.migration_files)
-}
-
-# -----------------------------------------------------------------------------
-# START OF DB PARAMETERS
-# -----------------------------------------------------------------------------
-
-data "aws_region" "current" {}
-
-data "aws_db_instance" "db_instance" {
-  db_instance_identifier = var.db_identifier
+  db_ssm_username_arn     = var.db_ssm_username_arn == null ? "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${var.db_ssm_username}" : var.db_ssm_username_arn
+  db_ssm_password_arn     = var.db_ssm_password_arn == null ? "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${var.db_ssm_password}" : var.db_ssm_password_arn
 }
 
 # -----------------------------------------------------------------------------
@@ -45,7 +45,6 @@ data "aws_db_instance" "db_instance" {
 # Note we need to upload local files to an S3 bucket to be pulled down into the function
 # -----------------------------------------------------------------------------
 
-data "aws_caller_identity" "current" {}
 
 resource "aws_s3_bucket" "migration_bucket_logs" {
   bucket = var.migrations_bucket_name != null ? "${var.migrations_bucket_name}-logs" : "${var.app_name}-schema-migrations-${data.aws_caller_identity.current.account_id}-logs"
@@ -275,12 +274,12 @@ resource "aws_iam_role_policy" "migrations_lambda" {
     },
     {
       "Action": "ssm:GetParameter",
-      "Resource": "${var.db_ssm_username_arn}",
+      "Resource": "${local.db_ssm_username_arn}",
       "Effect": "Allow"
     },
     {
       "Action": "ssm:GetParameter",
-      "Resource": "${var.db_ssm_password_arn}",
+      "Resource": "${local.db_ssm_password_arn}",
       "Effect": "Allow"
     }
   ]

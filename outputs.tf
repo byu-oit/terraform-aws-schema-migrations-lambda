@@ -1,3 +1,8 @@
+output "account_id" {
+  value       = data.aws_caller_identity.current.account_id
+  description = "account ID of current AWS account"
+}
+
 output "lambda_function" {
   value       = aws_lambda_function.migrations_lambda
   sensitive   = true

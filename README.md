@@ -89,9 +89,9 @@ No modules.
 | <a name="input_db_security_group_id"></a> [db\_security\_group\_id](#input\_db\_security\_group\_id) | The security group id where the schema migration lambda access rule should be added | `string` | `null` | no |
 | <a name="input_db_ssl_mode"></a> [db\_ssl\_mode](#input\_db\_ssl\_mode) | Whether to expect SSL or not for the database connection | `bool` | `false` | no |
 | <a name="input_db_ssm_password"></a> [db\_ssm\_password](#input\_db\_ssm\_password) | The ssm path for the password of a DDL user | `string` | `null` | no |
-| <a name="input_db_ssm_password_arn"></a> [db\_ssm\_password\_arn](#input\_db\_ssm\_password\_arn) | The ssm arn for the password of a DDL user | `string` | `null` | no |
+| <a name="input_db_ssm_password_arn"></a> [db\_ssm\_password\_arn](#input\_db\_ssm\_password\_arn) | The ssm arn for the password of a DDL user - will be computed if not provided | `string` | `null` | no |
 | <a name="input_db_ssm_username"></a> [db\_ssm\_username](#input\_db\_ssm\_username) | The ssm path for the username of a DDL user | `string` | `null` | no |
-| <a name="input_db_ssm_username_arn"></a> [db\_ssm\_username\_arn](#input\_db\_ssm\_username\_arn) | The ssm arn for the username of a DDL user | `string` | `null` | no |
+| <a name="input_db_ssm_username_arn"></a> [db\_ssm\_username\_arn](#input\_db\_ssm\_username\_arn) | The ssm arn for the username of a DDL user - will be computed if not provided | `string` | `null` | no |
 | <a name="input_ecr_image_tag"></a> [ecr\_image\_tag](#input\_ecr\_image\_tag) | Edge tag is for testing, use latest or another version tag for default uses.s | `string` | `"latest"` | no |
 | <a name="input_ecr_repo"></a> [ecr\_repo](#input\_ecr\_repo) | Default ecr repo name for the lambda image build | `string` | `"schema-migrations-lambda"` | no |
 | <a name="input_log_retention_in_days"></a> [log\_retention\_in\_days](#input\_log\_retention\_in\_days) | CloudWatch log group retention in days. Defaults to 7 | `number` | `7` | no |
@@ -108,6 +108,7 @@ No modules.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_account_id"></a> [account\_id](#output\_account\_id) | account ID of current AWS account |
 | <a name="output_cloudwatch_log_group"></a> [cloudwatch\_log\_group](#output\_cloudwatch\_log\_group) | lambda function cloudwatch logs path |
 | <a name="output_lambda_function"></a> [lambda\_function](#output\_lambda\_function) | lambda function name |
 | <a name="output_lambda_iam_role"></a> [lambda\_iam\_role](#output\_lambda\_iam\_role) | lambda function role |

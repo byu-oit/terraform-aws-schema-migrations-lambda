@@ -34,13 +34,13 @@ variable "db_ssm_password" {
 
 variable "db_ssm_username_arn" {
   type        = string
-  description = "The ssm arn for the username of a DDL user"
+  description = "The ssm arn for the username of a DDL user - will be computed if not provided"
   default     = null
 }
 
 variable "db_ssm_password_arn" {
   type        = string
-  description = "The ssm arn for the password of a DDL user"
+  description = "The ssm arn for the password of a DDL user - will be computed if not provided"
   default     = null
 }
 
