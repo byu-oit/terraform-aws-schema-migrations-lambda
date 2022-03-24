@@ -103,6 +103,10 @@ exports.down = async ({context: {client}}) => {
 
 #### Typescript Example
 
+Note: You must compile your typescript migrations and reference the
+output javascript files for the upload. Migration files must be
+javascript.
+
 ```ts
 // 1.0.0__init.mig.ts
 import {Connection} from 'mysql'
