@@ -47,7 +47,7 @@ jobs:
           node-version: ${{ env.node_version }}
 
       - name: Check out
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Disallow Concurrent Runs
         uses: byu-oit/github-action-disallow-concurrent-runs@v2
@@ -55,7 +55,7 @@ jobs:
           token: ${{ github.token }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets[matrix.env.aws_key_name] }}
           aws-secret-access-key: ${{ secrets[matrix.env.aws_secret_name] }}
