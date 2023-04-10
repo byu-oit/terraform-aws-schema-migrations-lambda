@@ -23,9 +23,3 @@ override.tf.json
 
 # Ignore jetbrains .idea folder
 .idea
-
-# NodeJS
-node_modules
-
-# Distribution
-dist

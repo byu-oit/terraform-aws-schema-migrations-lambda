@@ -53,14 +53,16 @@ export async function handler (event: Event): Promise<void> {
 
     // Run schema migrations
     // It is best to write schema migrations as a transaction to avoid the possibility of partially executed
-    // migrations. Umzug uses verror module to print human readable stack traces. An error thrown inside umzug
+    // migrations. Umzug uses verror module to print human-readable stack traces. An error thrown inside umzug
     // will print human-readable error messages using e.stack.
     // Migration Docs: https://github.com/sequelize/umzug#executing-pending-migrations
     // Error Docs: https://github.com/joyent/node-verror#verror-rich-javascript-errors
     await umzug.up()
   } catch (e) {
     failed = true
-    console.error(e.stack)
+    if (e instanceof Error) {
+      console.error(e.stack)
+    }
     throw e
   } finally {
     // Close database connection
@@ -84,5 +86,5 @@ export async function handler (event: Event): Promise<void> {
 }
 
 if (require.main === module) {
-  handler({}).catch((e) => console.error(e))
+  handler({}).catch(console.error)
 }
