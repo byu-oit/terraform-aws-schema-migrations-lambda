@@ -11,7 +11,7 @@ jobs:
     name: Build, Audit, & Lint the Docker Image
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - name: Build the Docker image
         working-directory: lambda
         run: docker build .
