@@ -10,12 +10,13 @@ RUN echo -n > /noop
 WORKDIR $LAMBDA_TASK_ROOT
 
 # Copy over src files and install dependencies
-COPY *.json ./
+COPY package*.json ./
 COPY src ./src/
 RUN npm ci --omit=dev
 
 # Compile the source code, should output dist directory
 FROM base as build
+COPY tsconfig*.json ./
 RUN npm ci
 RUN npm run compile
 
@@ -32,6 +33,7 @@ RUN echo '\nNode version:' \
 
 # Check code style
 FROM build as lint
+COPY .eslint* ./
 RUN npm run lint
 
 # Run tests

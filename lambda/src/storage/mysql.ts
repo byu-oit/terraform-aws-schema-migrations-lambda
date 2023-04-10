@@ -1,16 +1,11 @@
-import { type Connection, type FieldInfo } from 'mysql'
+import { type Connection, type FieldPacket } from 'mysql2/promise'
 import { type UmzugStorage, type MigrationParams } from 'umzug'
 import { type StorageContext } from './index'
 
 export class MySqlStorage implements UmzugStorage<StorageContext<Connection>> {
   // Helper method for converting mysql query callback to promise
-  static async query<T = unknown>(client: Connection, sql: string, params: unknown[] = []): Promise<[T[], FieldInfo[]]> {
-    return await new Promise<any>((resolve, reject) => {
-      return client.query(sql, params, (err, results, fields) => {
-        if (err != null) { reject(err); return }
-        resolve([results, fields])
-      })
-    })
+  static async query<T = unknown>(client: Connection, sql: string, params: unknown[] = []): Promise<[T[], FieldPacket[]]> {
+    return await client.query<any>(sql, params)
   }
 
   async logMigration ({ name, context }: MigrationParams<StorageContext<Connection>>): Promise<void> {
