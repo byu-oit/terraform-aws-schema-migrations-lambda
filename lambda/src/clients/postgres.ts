@@ -1,5 +1,5 @@
 import { Client } from 'pg'
-import { GenericConnection } from './index'
+import { type GenericConnection } from './index'
 
 let client: Client | null = null
 

@@ -2,7 +2,7 @@ import fs from 'fs'
 import { S3Client, ListObjectsCommand, GetObjectCommand } from '@aws-sdk/client-s3'
 import path from 'path'
 import * as env from './env'
-import { Readable } from 'stream'
+import { type Readable } from 'stream'
 
 const { aws: { region } } = env.get()
 const s3 = new S3Client({ region })

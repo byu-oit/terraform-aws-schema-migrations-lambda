@@ -1,25 +1,25 @@
-import mysql, { Connection } from 'mysql'
-import { GenericConnection } from './index'
+import mysql, { type Connection } from 'mysql'
+import { type GenericConnection } from './index'
 
 let client: Connection | null = null
 
 const connection: GenericConnection = {
   async connect (db) {
     return await new Promise((resolve, reject) => {
-      if (client != null) return resolve(client)
+      if (client != null) { resolve(client); return }
       client = mysql.createConnection(db)
-      return client.connect(err => {
-        if (err == null) return reject(err)
-        return resolve(client)
+      client.connect(err => {
+        if (err == null) { reject(err); return }
+        resolve(client)
       })
     })
   },
   async close () {
-    return await new Promise((resolve, reject) => {
-      if (client == null) return resolve()
-      return client.end(err => {
-        if (err != null) return reject(err)
-        return resolve()
+    await new Promise((resolve, reject) => {
+      if (client == null) { resolve(); return }
+      client.end(err => {
+        if (err != null) { reject(err); return }
+        resolve()
       })
     })
   }

@@ -1,6 +1,6 @@
 import mysql from './mysql'
 import postgres from './postgres'
-import { DBEnvConfiguration } from '../util/env'
+import { type DBEnvConfiguration } from '../util/env'
 
 export interface GenericConnection<Client = unknown> {
   connect: (db: DBEnvConfiguration) => Promise<Client>

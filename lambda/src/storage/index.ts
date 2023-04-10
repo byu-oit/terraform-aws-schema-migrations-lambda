@@ -1,4 +1,4 @@
-import { UmzugStorage } from 'umzug'
+import { type UmzugStorage } from 'umzug'
 import { MySqlStorage } from './mysql'
 import { PostgreSQLStorage } from './postgres'
 

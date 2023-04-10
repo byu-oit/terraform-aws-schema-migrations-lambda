@@ -1,7 +1,7 @@
 # Using the official AWS Lambda NodeJS image
 # Node Image Repository: https://github.com/aws/aws-lambda-base-images/tree/nodejs14.x
 # Docs: https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html#configuration-envvars-runtime
-FROM public.ecr.aws/lambda/nodejs:14 as base
+FROM public.ecr.aws/lambda/nodejs:18 as base
 
 # An empty file that we can "copy" around to create dependencies between build stages
 RUN echo -n > /noop
@@ -12,11 +12,11 @@ WORKDIR $LAMBDA_TASK_ROOT
 # Copy over src files and install dependencies
 COPY *.json ./
 COPY src ./src/
-RUN npm --production install
+RUN npm ci --omit=dev
 
 # Compile the source code, should output dist directory
 FROM base as build
-RUN npm install
+RUN npm ci
 RUN npm run compile
 
 # Audit dependencies
