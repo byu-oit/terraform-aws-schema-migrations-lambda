@@ -2,6 +2,7 @@ import fs from 'fs'
 import { S3Client, ListObjectsCommand, GetObjectCommand } from '@aws-sdk/client-s3'
 import path from 'path'
 import * as env from './env'
+import { Readable } from 'stream'
 
 const { aws: { region } } = env.get()
 const s3 = new S3Client({ region })
@@ -20,8 +21,8 @@ export async function downloadMigrations (bucket: string, downloadFolder: string
     const { Key } = file
     const getObjectCommand = new GetObjectCommand({ Bucket: bucket, Key })
     const { Body } = await s3.send(getObjectCommand)
-    // Object will always have a Key
-    return { fileName: Key as string, content: Body }
+    // Object will always have a Key and Body
+    return { fileName: Key as string, content: Body as Readable }
   }))
 
   // Store all migrations locally
