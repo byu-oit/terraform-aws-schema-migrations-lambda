@@ -11,7 +11,7 @@ on:
 env:
   node_version: "14.x"
   tf_version: "0.14.8" # must conform to value in terraform-iac/*/app/main.tf
-
+concurrency: ${{ github.ref }}
 jobs:
   env:
     name: Set Env Vars
@@ -24,8 +24,8 @@ jobs:
               {
                 "ecr_repo_name":"schema-migrations-lambda",
                 "tf_working_dir":".",
-                "aws_key_name":"byu_oit_terraform_prd_key",
-                "aws_secret_name":"byu_oit_terraform_prd_secret"
+                "aws_account":"977306314792",
+                "aws_gha_role":"schema-migrations-lambda-dev-gha"
               }
             ]
           }'
@@ -40,6 +40,9 @@ jobs:
     needs: env
     strategy:
       matrix: ${{ fromJson(needs.env.outputs.matrix) }}
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Set up Node.js
         uses: actions/setup-node@v1
@@ -49,16 +52,11 @@ jobs:
       - name: Check out
         uses: actions/checkout@v2
 
-      - name: Disallow Concurrent Runs
-        uses: byu-oit/github-action-disallow-concurrent-runs@v2
-        with:
-          token: ${{ github.token }}
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets[matrix.env.aws_key_name] }}
-          aws-secret-access-key: ${{ secrets[matrix.env.aws_secret_name] }}
+          role-to-assume: "arn:aws:iam::${{ matrix.env.aws_account }}:role/${{ matrix.env.aws_gha_role }}"
+          role-session-name: ${{ github.sha }}
           aws-region: us-west-2
 
       - name: Log into Amazon ECR
