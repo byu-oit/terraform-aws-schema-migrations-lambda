@@ -40,7 +40,7 @@ module "acs" {
 
 module "gha_role" {
   source                         = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                        = "5.17.0"
+  version                        = "5.31.0"
   create_role                    = true
   role_name                      = "${local.name}-${local.env}-gha"
   provider_url                   = module.acs.github_oidc_provider.url
